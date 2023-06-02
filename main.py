@@ -1,4 +1,5 @@
 import pygame
+#Alex sucks
 
 # Intialize the pygame
 pygame.init()
