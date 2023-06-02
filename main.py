@@ -64,3 +64,6 @@ while running:
         playerY = screenHeight - playerH
     player()
     pygame.display.update()
+
+
+    #hi tony
