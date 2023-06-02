@@ -11,11 +11,11 @@ screen = pygame.display.set_mode((screenWidth, screenHeight))
 
 #Title and Icon
 pygame.display.set_caption("Buffet Wars")
-icon = pygame.image.load("pygame/Assets/Apple.png")
+icon = pygame.image.load("Assets/Apple.png")
 pygame.display.set_icon(icon)
 
 #Player
-playerImg = pygame.image.load("pygame/Assets/player.png")
+playerImg = pygame.image.load("Assets/player.png")
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
