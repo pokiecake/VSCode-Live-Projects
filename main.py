@@ -30,6 +30,11 @@ playerDirection = 0
 appleImg = pygame.image.load("Assets/Apple.png")
 appleX = random.randint(50, 750)
 appleY = random.randint(50, 350)
+apple_state = "ready"
+appleBulletX = 0
+appleBulletY = 0
+apple_changeX = 0
+apple_changeY = 0
 
 #Background
 background = pygame.image.load("Assets/spongebob.png")
@@ -40,6 +45,46 @@ def player(x, y):
 def apple(x, y):
     screen.blit(appleImg, (x, y))
 
+def fire_apple(x, y):
+    global apple_state
+    global appleBulletX
+    global appleBulletY
+    global apple_changeX
+    global apple_changeY
+    apple_state = "fire"
+    xPos = x
+    yPos = y
+    match(playerDirection):
+        case 0:
+            yPos -= 25
+            xPos += 25
+            apple_changeX = 0
+            apple_changeY = -7
+            pass
+        case 1:
+            yPos += 50
+            xPos += 30
+            apple_changeX = 7
+            apple_changeY = 0
+            pass
+        case 2:
+            yPos += 150
+            xPos += 25
+            apple_changeX = 0
+            apple_changeY = 7
+            pass
+        case 3:
+            yPos += 50
+            xPos -= 10
+            apple_changeX = -7
+            apple_changeY = 0
+            pass
+    appleBulletX = xPos
+    appleBulletY = yPos
+
+def draw_apple(x, y):
+    screen.blit(appleImg, (x, y))
+
 #background sound
 mixer.music.load('Assets/Clouds.wav')
 mixer.music.play(-1)
@@ -48,9 +93,10 @@ mixer.music.play(-1)
 running = True
 while running:
 
-    #Draws Purplish background
+    #Draws Purplish background. Unneeded due to spongebob background
     screen.fill((150,0,150))
 
+    #draws spongebob background
     screen.blit(background, (75,100))
     #event listener
     for event in pygame.event.get():
@@ -77,6 +123,8 @@ while running:
                 playerDirection = 2
             if event.key == pygame.K_a:
                 playerDirection = 3
+            if event.key == pygame.K_SPACE:
+                fire_apple(playerX, playerY)
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted
@@ -99,6 +147,12 @@ while running:
     elif playerY + playerH >= screenHeight:
         playerY = screenHeight - playerH
     
+    #Bullet movement
+    if apple_state is "fire":
+        appleBulletX += apple_changeX
+        appleBulletY += apple_changeY
+        draw_apple(appleBulletX, appleBulletY)
+
     #draws the players and apples
     player(playerX, playerY)
     apple(appleX, appleY)
