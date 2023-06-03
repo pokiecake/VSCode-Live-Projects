@@ -1,4 +1,5 @@
 import pygame
+from pygame import mixer
 import random
 
 # Intialize the pygame
@@ -33,6 +34,10 @@ def player(x, y):
 
 def apple(x, y):
     screen.blit(appleImg, (x, y))
+
+#background sound
+mixer.music.load('Assets/Clouds.wav')
+mixer.music.play(-1)
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
@@ -83,3 +88,4 @@ while running:
     player(playerX, playerY)
     apple(appleX, appleY)
     pygame.display.update()
+
