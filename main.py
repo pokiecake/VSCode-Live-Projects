@@ -31,12 +31,13 @@ appleImg = pygame.image.load("Assets/Apple.png")
 appleX = random.randint(50, 750)
 appleY = random.randint(50, 350)
 
-#Apple Bullet
+#Apple Bullets
 apple_state = "ready"
 appleBulletX = 0
 appleBulletY = 0
 apple_changeX = 0
 apple_changeY = 0
+bullets = []
 
 #Background
 background = pygame.image.load("Assets/spongebob.png")
@@ -53,6 +54,7 @@ def fire_apple(x, y):
     global appleBulletY
     global apple_changeX
     global apple_changeY
+    global bullets
     apple_state = "fire"
     xPos = x
     yPos = y
@@ -85,10 +87,26 @@ def fire_apple(x, y):
     #sets the apple bullet's position based on the direction
     appleBulletX = xPos
     appleBulletY = yPos
+    bullet = Apple(xPos, yPos, apple_changeX, apple_changeY)
+    bullets.append(bullet)
 
 def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
 
+class Apple:
+    def __init__(self, x, y, change_x, change_y):
+        self.x = x
+        self.y = y
+        self.change_x = change_x
+        self.change_y = change_y
+    
+    def change(self):
+        self.x += self.change_x
+        self.y += self.change_y
+    
+    def getPos(self):
+        return (self.x, self.y)
+        
 #background sound
 mixer.music.load('Assets/Clouds.wav')
 mixer.music.set_volume(0.2)
@@ -157,6 +175,10 @@ while running:
         appleBulletX += apple_changeX
         appleBulletY += apple_changeY
         draw_apple(appleBulletX, appleBulletY)
+    for bullet in bullets:
+        bullet.change()
+        pos = bullet.getPos()
+        draw_apple(pos[0], pos[1])
 
     #draws the players and apples
     player(playerX, playerY)
