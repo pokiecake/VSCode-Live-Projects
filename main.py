@@ -219,7 +219,7 @@ while running:
             if event.key == pygame.K_a:
                 playerDirection = 3
             if event.key == pygame.K_SPACE:
-                if appleBulletCount > 1:
+                if appleBulletCount > 0:
                     fire_apple(playerX, playerY)
                     appleBulletCount -= 1
         #handles key lifts
