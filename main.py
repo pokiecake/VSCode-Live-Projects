@@ -215,6 +215,7 @@ while running:
     for pile in stockpiles:
         pos = pile.getPos()
         draw_apple(pos[0], pos[1])
+        #removes a pile if collided and adds to the apple bullet count
         if pile.checkCollision(playerX, playerY, playerW, playerH):
             stockpiles.remove(pile)
             del pile
