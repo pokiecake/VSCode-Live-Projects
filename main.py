@@ -23,6 +23,7 @@ playerX = 370
 playerY = 350
 playerX_change = 0
 playerY_change = 0
+playerDirection = 0
 
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
@@ -62,6 +63,15 @@ while running:
                 playerY_change = -0.3
             if event.key == pygame.K_DOWN:
                 playerY_change = 0.3
+            #changes the direction of the player
+            if event.key == pygame.K_w:
+                playerDirection = 0
+            if event.key == pygame.K_d:
+                playerDirection = 1
+            if event.key == pygame.K_s:
+                playerDirection = 2
+            if event.key == pygame.K_a:
+                playerDirection = 3
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted
