@@ -1,4 +1,7 @@
 import pygame
+
+
+from pygame import mixer
 #Alex sucks
 
 # Intialize the pygame
@@ -65,5 +68,7 @@ while running:
     player()
     pygame.display.update()
 
+#background sound
+mixer.music.load('Clouds.wav')
+mixer.music.play(-1)
 
-    #hi tony
