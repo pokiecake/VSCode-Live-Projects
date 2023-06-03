@@ -28,16 +28,21 @@ playerDirection = 0
 
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
-appleX = random.randint(50, 750)
-appleY = random.randint(50, 350)
+appleW = appleImg.get_width()
+appleH = appleImg.get_height()
 
 #Apple Bullets
 apple_state = "ready"
+bullets = []
 appleBulletX = 0
 appleBulletY = 0
 apple_changeX = 0
 apple_changeY = 0
-bullets = []
+appleBulletCount = 0
+
+#Apple Stockpiles
+stockpiles = []
+
 
 #Background
 background = pygame.image.load("Assets/spongebob.png")
@@ -48,6 +53,7 @@ def player(x, y):
 def apple(x, y):
     screen.blit(appleImg, (x, y))
 
+#doesn't actually fire apples, only creates them and their positions
 def fire_apple(x, y):
     global apple_state
     global appleBulletX
@@ -87,13 +93,15 @@ def fire_apple(x, y):
     #sets the apple bullet's position based on the direction
     appleBulletX = xPos
     appleBulletY = yPos
-    bullet = Apple(xPos, yPos, apple_changeX, apple_changeY)
+    bullet = AppleBullets(xPos, yPos, apple_changeX, apple_changeY)
     bullets.append(bullet)
 
+#draws anything apple related
 def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
 
-class Apple:
+#class for apple bullets
+class AppleBullets:
     def __init__(self, x, y, change_x, change_y):
         self.x = x
         self.y = y
@@ -106,7 +114,24 @@ class Apple:
     
     def getPos(self):
         return (self.x, self.y)
-        
+
+#class for apple stockpiles
+class AppleStockpiles:
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+    
+    #checks for collision in the horizontal and vertical direction
+    def checkCollision(self, pX, pY, pW, pH):
+        if (pY < self.y + self.h and pY + pH > self.y):
+            if (pX < self.x + self.w and pX + pW > self.x) or (pX + pW > self.x and pX < self.x + self.w):
+                return True
+    
+    def getPos(self):
+        return (self.x, self.y)
+
 #background sound
 mixer.music.load('Assets/Clouds.wav')
 mixer.music.set_volume(0.2)
@@ -115,7 +140,10 @@ mixer.music.play(-1)
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
 while running:
-
+    #creates a new stockpile if one hasn't been created
+    if stockpiles.__len__() == 0:
+        s = AppleStockpiles(random.randint(50, 750), random.randint(50, 550), appleW, appleH)
+        stockpiles.append(s)
     #Draws Purplish background. Unneeded due to spongebob background
     screen.fill((150,0,150))
 
@@ -147,7 +175,9 @@ while running:
             if event.key == pygame.K_a:
                 playerDirection = 3
             if event.key == pygame.K_SPACE:
-                fire_apple(playerX, playerY)
+                if appleBulletCount > 1:
+                    fire_apple(playerX, playerY)
+                    appleBulletCount -= 1
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted
@@ -181,8 +211,15 @@ while running:
             bullets.remove(bullet)
             del bullet
 
+    #checks for collision for all stockpiles
+    for pile in stockpiles:
+        pos = pile.getPos()
+        draw_apple(pos[0], pos[1])
+        if pile.checkCollision(playerX, playerY, playerW, playerH):
+            stockpiles.remove(pile)
+            del pile
+            appleBulletCount += 1
 
     #draws the players and apples
     player(playerX, playerY)
-    apple(appleX, appleY)
     pygame.display.update()
