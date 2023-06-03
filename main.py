@@ -38,6 +38,7 @@ def apple(x, y):
 
 #background sound
 mixer.music.load('Assets/Clouds.wav')
+mixer.music.set_volume(0.2)
 mixer.music.play(-1)
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
