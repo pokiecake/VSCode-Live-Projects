@@ -24,7 +24,7 @@ playerX = 370
 playerY = 350
 playerX_change = 0
 playerY_change = 0
-playerSpeed = 2
+playerSpeed = 3
 playerDirection = 0
 
 #Apple
@@ -145,11 +145,13 @@ mixer.music.set_volume(0.2)
 mixer.music.play(-1)
 
 #Global Variable Setup
-#Key Press Status (held down or not)
+#Key Press Status & Contradict Speed (held down or not)
 lefthold = False
 righthold = False
 uphold = False
 downhold = False
+#Controls speed when both opposite buttons pressed
+stuckspeed = 0.0 * playerSpeed
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
@@ -171,31 +173,31 @@ while running:
         #handles key presses
         if event.type == pygame.KEYDOWN:
             #sets the x and y changes based on what is pressed
-            #if both opposite directions are held, player stops
+            #if both opposite directions are held, player moves slower at rate of stuckspeed
             if event.key == pygame.K_LEFT and righthold == False:
                 playerX_change = -playerSpeed
                 lefthold = True
             elif event.key == pygame.K_LEFT and righthold == True:
-                playerX_change = 0
+                playerX_change = stuckspeed
                 lefthold = True
             if event.key == pygame.K_RIGHT and lefthold == False:
                 playerX_change = playerSpeed
                 righthold = True
             elif event.key == pygame.K_RIGHT and lefthold == True:
-                playerX_change = 0
+                playerX_change = -stuckspeed
                 righthold = True
 
             if event.key == pygame.K_UP and downhold == False:
                 playerY_change = -playerSpeed
                 uphold = True
             elif event.key == pygame.K_UP and downhold == True:
-                playerY_change = 0
+                playerY_change = stuckspeed
                 uphold = True
             if event.key == pygame.K_DOWN and uphold == False:
                 playerY_change = playerSpeed
                 downhold = True
             elif event.key == pygame.K_DOWN and uphold == True:
-                playerY_change = 0
+                playerY_change = -stuckspeed
                 downhold = True
             
             #changes the direction of the player's shooting
