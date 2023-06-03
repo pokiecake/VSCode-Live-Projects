@@ -23,12 +23,16 @@ playerX = 370
 playerY = 350
 playerX_change = 0
 playerY_change = 0
+playerSpeed = 2
 playerDirection = 0
 
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
 appleX = random.randint(50, 750)
 appleY = random.randint(50, 350)
+
+#Background
+background = pygame.image.load("Assets/spongebob.png")
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -48,6 +52,7 @@ while running:
     #Draws Purplish background
     screen.fill((150,0,150))
 
+    screen.blit(background, (75,100))
     #event listener
     for event in pygame.event.get():
         #stops the game when the x button is pressed
@@ -57,13 +62,13 @@ while running:
         if event.type == pygame.KEYDOWN:
             #sets the x and y changes based on what is pressed
             if event.key == pygame.K_LEFT:
-                playerX_change = -0.3
+                playerX_change = -playerSpeed
             if event.key == pygame.K_RIGHT:
-                playerX_change = 0.3
+                playerX_change = playerSpeed
             if event.key == pygame.K_UP:
-                playerY_change = -0.3
+                playerY_change = -playerSpeed
             if event.key == pygame.K_DOWN:
-                playerY_change = 0.3
+                playerY_change = playerSpeed
             #changes the direction of the player
             if event.key == pygame.K_w:
                 playerDirection = 0
