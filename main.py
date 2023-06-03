@@ -94,6 +94,13 @@ mixer.music.load('Assets/Clouds.wav')
 mixer.music.set_volume(0.2)
 mixer.music.play(-1)
 
+#Global Variable Setup
+#Key Press Status (held down or not)
+lefthold = False
+righthold = False
+uphold = False
+downhold = False
+
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
 while running:
@@ -103,6 +110,7 @@ while running:
 
     #draws spongebob background
     screen.blit(background, (75,100))
+
     #event listener
     for event in pygame.event.get():
         #stops the game when the x button is pressed
@@ -111,14 +119,33 @@ while running:
         #handles key presses
         if event.type == pygame.KEYDOWN:
             #sets the x and y changes based on what is pressed
-            if event.key == pygame.K_LEFT:
+            #if both opposite directions are held, player stops
+            if event.key == pygame.K_LEFT and righthold == False:
                 playerX_change = -playerSpeed
-            if event.key == pygame.K_RIGHT:
+                lefthold = True
+            elif event.key == pygame.K_LEFT and righthold == True:
+                playerX_change = 0
+                lefthold = True
+            if event.key == pygame.K_RIGHT and lefthold == False:
                 playerX_change = playerSpeed
-            if event.key == pygame.K_UP:
+                righthold = True
+            elif event.key == pygame.K_RIGHT and lefthold == True:
+                playerX_change = 0
+                righthold = True
+
+            if event.key == pygame.K_UP and downhold == False:
                 playerY_change = -playerSpeed
-            if event.key == pygame.K_DOWN:
+                uphold = True
+            elif event.key == pygame.K_UP and downhold == True:
+                playerY_change = 0
+                uphold = True
+            if event.key == pygame.K_DOWN and uphold == False:
                 playerY_change = playerSpeed
+                downhold = True
+            elif event.key == pygame.K_DOWN and uphold == True:
+                playerY_change = 0
+                downhold = True
+            
             #changes the direction of the player's shooting
             if event.key == pygame.K_w:
                 playerDirection = 0
@@ -130,12 +157,35 @@ while running:
                 playerDirection = 3
             if event.key == pygame.K_SPACE:
                 fire_apple(playerX, playerY)
+
         #handles key lifts
         if event.type == pygame.KEYUP:
-            #stops changes after corresponding keys are lifted
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+            #stops changes after corresponding keys are lifted given that no other key is held
+            #if the other direction is held, direction immediately switches to match
+            if event.key == pygame.K_LEFT and righthold == True:
+                playerX_change = playerSpeed
+                lefthold = False
+            elif event.key == pygame.K_RIGHT and lefthold == True:
+                playerX_change = -playerSpeed
+                righthold = False
+            elif event.key == pygame.K_RIGHT:
+                righthold = False
                 playerX_change = 0
-            if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
+            elif event.key == pygame.K_LEFT:
+                lefthold = False
+                playerX_change = 0
+
+            if event.key == pygame.K_UP and downhold == True:
+                playerY_change = playerSpeed
+                uphold = False
+            elif event.key == pygame.K_DOWN and uphold == True:
+                playerY_change = -playerSpeed
+                downhold = False
+            elif event.key == pygame.K_DOWN:
+                downhold = False
+                playerY_change = 0
+            elif event.key == pygame.K_UP:
+                uphold = False
                 playerY_change = 0
 
     #changes the player's position
@@ -153,7 +203,7 @@ while running:
         playerY = screenHeight - playerH
     
     #Bullet movement
-    if apple_state is "fire":
+    if apple_state == "fire":
         appleBulletX += apple_changeX
         appleBulletY += apple_changeY
         draw_apple(appleBulletX, appleBulletY)
