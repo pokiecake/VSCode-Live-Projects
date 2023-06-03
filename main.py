@@ -1,6 +1,7 @@
 import pygame
 from pygame import mixer
 import random
+import time
 
 # Intialize the pygame
 pygame.init()
@@ -99,6 +100,13 @@ def fire_apple(x, y):
 def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
 
+#spawns stockpile on cooldown
+async def spawn_apple_pile(t):
+    time.sleep(t)
+    s = AppleStockpiles(random.randint(50, 750), random.randint(50, 550), appleW, appleH)
+    stockpiles.append(s)
+    draw_apple(x, y)
+
 #class for apple bullets
 class AppleBullets:
     def __init__(self, x, y, change_x, change_y):
@@ -148,8 +156,7 @@ running = True
 while running:
     #creates a new stockpile if one hasn't been created
     if stockpiles.__len__() == 0:
-        s = AppleStockpiles(random.randint(50, 750), random.randint(50, 550), appleW, appleH)
-        stockpiles.append(s)
+        spawn_apple_pile(2)
     #Draws Purplish background. Unneeded due to spongebob background
     screen.fill((150,0,150))
 
