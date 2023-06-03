@@ -30,6 +30,8 @@ playerDirection = 0
 appleImg = pygame.image.load("Assets/Apple.png")
 appleX = random.randint(50, 750)
 appleY = random.randint(50, 350)
+
+#Apple Bullet
 apple_state = "ready"
 appleBulletX = 0
 appleBulletY = 0
@@ -54,6 +56,7 @@ def fire_apple(x, y):
     apple_state = "fire"
     xPos = x
     yPos = y
+    #0 is up, 1 is right, 2 is down, 3 is left
     match(playerDirection):
         case 0:
             yPos -= 25
@@ -79,6 +82,7 @@ def fire_apple(x, y):
             apple_changeX = -7
             apple_changeY = 0
             pass
+    #sets the apple bullet's position based on the direction
     appleBulletX = xPos
     appleBulletY = yPos
 
@@ -114,7 +118,7 @@ while running:
                 playerY_change = -playerSpeed
             if event.key == pygame.K_DOWN:
                 playerY_change = playerSpeed
-            #changes the direction of the player
+            #changes the direction of the player's shooting
             if event.key == pygame.K_w:
                 playerDirection = 0
             if event.key == pygame.K_d:
