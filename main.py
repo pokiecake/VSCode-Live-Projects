@@ -171,14 +171,16 @@ while running:
         playerY = screenHeight - playerH
     
     #Bullet movement
-    if apple_state is "fire":
-        appleBulletX += apple_changeX
-        appleBulletY += apple_changeY
-        draw_apple(appleBulletX, appleBulletY)
     for bullet in bullets:
         bullet.change()
         pos = bullet.getPos()
-        draw_apple(pos[0], pos[1])
+        x = pos[0]
+        y = pos[1]
+        draw_apple(x, y)
+        if x < 0 or x > screenWidth or y < 0 or y > screenHeight:
+            bullets.remove(bullet)
+            del bullet
+
 
     #draws the players and apples
     player(playerX, playerY)
