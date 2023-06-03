@@ -150,7 +150,7 @@ class AppleStockpiles:
         return (self.x, self.y)
 
 #background sound
-mixer.music.load('Assets/Clouds.wav')
+mixer.music.load('Assets/Sky.wav')
 mixer.music.set_volume(0.2)
 mixer.music.play(-1)
 
