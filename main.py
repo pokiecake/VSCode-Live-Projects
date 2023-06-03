@@ -2,6 +2,7 @@ import pygame
 from pygame import mixer
 import random
 import time
+import asyncio
 
 # Intialize the pygame
 pygame.init()
@@ -43,6 +44,7 @@ appleBulletCount = 0
 
 #Apple Stockpiles
 stockpiles = []
+stockpilesTimes = [-2]
 
 #Background
 background = pygame.image.load("Assets/spongebob.png")
@@ -101,11 +103,19 @@ def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
 
 #spawns stockpile on cooldown
-async def spawn_apple_pile(t):
-    time.sleep(t)
-    s = AppleStockpiles(random.randint(50, 750), random.randint(50, 550), appleW, appleH)
+def spawn_apple_pile():
+    x = random.randint(50, 750)
+    y = random.randint(50, 550)
+    s = AppleStockpiles(x, y, appleW, appleH)
     stockpiles.append(s)
     draw_apple(x, y)
+
+def check_timeouts():
+    sec = time.time()
+    for sTime in stockpilesTimes:
+        if sec > sTime + 1:
+            spawn_apple_pile()
+            stockpilesTimes.remove(sTime)
 
 #class for apple bullets
 class AppleBullets:
@@ -155,8 +165,7 @@ downhold = False
 running = True
 while running:
     #creates a new stockpile if one hasn't been created
-    if stockpiles.__len__() == 0:
-        spawn_apple_pile(2)
+    check_timeouts()
     #Draws Purplish background. Unneeded due to spongebob background
     screen.fill((150,0,150))
 
@@ -275,6 +284,7 @@ while running:
             stockpiles.remove(pile)
             del pile
             appleBulletCount += 1
+            stockpilesTimes.append(time.time())
 
     #draws the players and apples
     player(playerX, playerY)
