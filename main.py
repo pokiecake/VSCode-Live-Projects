@@ -1,8 +1,6 @@
 import pygame
-
-
 from pygame import mixer
-#Alex sucks
+import random
 
 # Intialize the pygame
 pygame.init()
@@ -28,14 +26,18 @@ playerY_change = 0
 
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
-appleX = 50
-appleY = 50
+appleX = random.randint(50, 750)
+appleY = random.randint(50, 350)
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
 def apple(x, y):
     screen.blit(appleImg, (x, y))
+
+#background sound
+mixer.music.load('Assets/Clouds.wav')
+mixer.music.play(-1)
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
@@ -44,10 +46,14 @@ while running:
     #Draws Purplish background
     screen.fill((150,0,150))
 
+    #event listener
     for event in pygame.event.get():
+        #stops the game when the x button is pressed
         if event.type == pygame.QUIT:
             running = False
+        #handles key presses
         if event.type == pygame.KEYDOWN:
+            #sets the x and y changes based on what is pressed
             if event.key == pygame.K_LEFT:
                 playerX_change = -0.3
             if event.key == pygame.K_RIGHT:
@@ -56,13 +62,15 @@ while running:
                 playerY_change = -0.3
             if event.key == pygame.K_DOWN:
                 playerY_change = 0.3
+        #handles key lifts
         if event.type == pygame.KEYUP:
+            #stops changes after corresponding keys are lifted
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
             if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
                 playerY_change = 0
 
-    #Draws player
+    #changes the player's position
     playerX += playerX_change
     playerY += playerY_change
 
@@ -80,8 +88,3 @@ while running:
     player(playerX, playerY)
     apple(appleX, appleY)
     pygame.display.update()
-
-#background sound
-mixer.music.load('Assets/Clouds.wav')
-mixer.music.play(-1)
-
