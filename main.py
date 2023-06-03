@@ -26,8 +26,16 @@ playerY = 350
 playerX_change = 0
 playerY_change = 0
 
-def player():
-    screen.blit(playerImg, (playerX, playerY))
+#Apple
+appleImg = pygame.image.load("Assets/Apple.png")
+appleX = 50
+appleY = 50
+
+def player(x, y):
+    screen.blit(playerImg, (x, y))
+
+def apple(x, y):
+    screen.blit(appleImg, (x, y))
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
@@ -57,6 +65,8 @@ while running:
     #Draws player
     playerX += playerX_change
     playerY += playerY_change
+
+    #snaps the player to a boundary
     if playerX <= 0:
         playerX = 0
     elif playerX + playerW >= screenWidth:
@@ -65,7 +75,10 @@ while running:
         playerY = 0
     elif playerY + playerH >= screenHeight:
         playerY = screenHeight - playerH
-    player()
+    
+    #draws the players and apples
+    player(playerX, playerY)
+    apple(appleX, appleY)
     pygame.display.update()
 
 #background sound
