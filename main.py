@@ -43,7 +43,6 @@ appleBulletCount = 0
 #Apple Stockpiles
 stockpiles = []
 
-
 #Background
 background = pygame.image.load("Assets/spongebob.png")
 
