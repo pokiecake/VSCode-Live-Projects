@@ -82,6 +82,6 @@ while running:
     pygame.display.update()
 
 #background sound
-mixer.music.load('Clouds.wav')
+mixer.music.load('Assets/Clouds.wav')
 mixer.music.play(-1)
 
