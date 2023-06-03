@@ -88,4 +88,3 @@ while running:
     player(playerX, playerY)
     apple(appleX, appleY)
     pygame.display.update()
-
