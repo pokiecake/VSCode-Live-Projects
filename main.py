@@ -18,7 +18,7 @@ icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
 
 #Player
-playerImg = pygame.image.load("Assets/player.png")
+playerImg = pygame.image.load("Sprites/bob.png")
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
