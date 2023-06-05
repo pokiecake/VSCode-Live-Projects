@@ -20,7 +20,6 @@ pygame.display.set_icon(icon)
 
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
-PLAYERSIZE = (16,25)
 playerImg = pygame.transform.scale(playerImg,(125,196))
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
