@@ -4,6 +4,7 @@ import random
 import time
 import asyncio
 
+
 # Intialize the pygame
 pygame.init()
 
@@ -19,6 +20,8 @@ pygame.display.set_icon(icon)
 
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
+PLAYERSIZE = (16,25)
+playerImg = pygame.transform.scale(playerImg,(125,196))
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
@@ -47,7 +50,13 @@ stockpiles = []
 stockpilesTimes = [-2]
 
 #Background
-background = pygame.image.load("Assets/spongebob.png")
+background = pygame.Surface((screenWidth, screenHeight))
+
+BGImage = pygame.image.load("Assets/spongebob.png")
+
+BGImage = pygame.transform.scale(BGImage,(screenWidth, screenHeight))
+
+# camera setup
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -169,10 +178,15 @@ while running:
     #creates a new stockpile if one hasn't been created
     check_timeouts()
     #Draws Purplish background. Unneeded due to spongebob background
-    screen.fill((150,0,150))
+    #screen.fill((150,0,150))
 
     #draws spongebob background
-    screen.blit(background, (75,100))
+    #pygame.transform.scale_by(BGImage,20)
+    #screen.blit(background, (0,0))
+    screen.blit(BGImage, (0,0))
+
+    
+
 
     #event listener
     for event in pygame.event.get():
