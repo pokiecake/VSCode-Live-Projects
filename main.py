@@ -77,26 +77,26 @@ def fire_apple(x, y):
     #0 is up, 1 is right, 2 is down, 3 is left
     match(playerDirection):
         case 0:
-            yPos -= 25
-            xPos += 25
+            yPos -= appleH
+            xPos += (playerW - appleW) / 2
             apple_changeX = 0
             apple_changeY = -7
             pass
         case 1:
-            yPos += 50
-            xPos += 30
+            yPos += (playerH - appleH) / 2
+            xPos += playerW + appleW
             apple_changeX = 7
             apple_changeY = 0
             pass
         case 2:
-            yPos += 150
-            xPos += 25
+            yPos += playerH + appleH
+            xPos += (playerW - appleW) / 2
             apple_changeX = 0
             apple_changeY = 7
             pass
         case 3:
-            yPos += 50
-            xPos -= 10
+            yPos += (playerH - appleH) / 2
+            xPos -= appleW
             apple_changeX = -7
             apple_changeY = 0
             pass
