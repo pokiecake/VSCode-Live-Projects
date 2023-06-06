@@ -1,3 +1,10 @@
+"""
+From Tony
+Run this Version
+It's funny
+Hope you enjoy
+"""
+
 import pygame
 from pygame import mixer
 import random
@@ -182,10 +189,16 @@ def spawn_apple_pile(roomNum = currentRoom):
 #temporary timer to automatically create stockpiles after a delay
 def check_timeouts():
     sec = time.time()
-    for sTime in stockpilesTimeouts:
-        if sec > sTime[0] + 1:
-            spawn_apple_pile(sTime[1])
-            stockpilesTimeouts.remove(sTime)
+    for spawner in spawners:
+        spawner.check_for_stockpiles(sec)
+        for timeout in spawner.get_timeouts():
+            if sec > timeout[0]:
+                pile = spawn_apple_pile(timeout[1])
+                spawner.add_stockpile(pile)
+    #for sTime in stockpilesTimeouts:
+        #if sec > sTime[0] + 1:
+            #spawn_apple_pile(sTime[1])
+            #stockpilesTimeouts.remove(sTime)
 
 #checks collision between target 1 and 2. Trust me on the math
 def check_collisions(target1P, target2P):
@@ -241,13 +254,20 @@ class Spawners:
         self.type = type
         self.room = room
         self.stockpiles = []
+        self.stockpileTimeouts = []
         self.maxStockpiles = 1
         self.queuedStockpiles = 0
     
-    def check_for_stockpiles(self):
-        if (self.stockpiles.__len__() < self.maxStockpiles):
+    def check_for_stockpiles(self, time):
+        if (self.stockpiles.__len__() + self.queuedStockpiles < self.maxStockpiles):
             self.queuedStockpiles += 1
-            self.stockpiles.append(spawn_apple_pile())
+            self.stockpileTimeouts.append((time, self.room))
+    
+    def add_stockpile(self, pile):
+        self.stockpiles.append(pile)
+    
+    def get_timeouts(self):
+        return self.stockpileTimeouts
 
 
 #class for rooms
@@ -288,6 +308,8 @@ rooms.append(Rooms(3, [(2, 2)]))
 rooms.append(Rooms(4, [(1, 3), (5, 2)]))
 rooms.append(Rooms(5, [(4, 0), (6, 3)]))
 rooms.append(Rooms(6, [(1, 0), (5, 1)]))
+
+spawners.append(Spawners("apple", 1))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')

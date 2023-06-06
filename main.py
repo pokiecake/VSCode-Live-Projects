@@ -46,8 +46,11 @@ apple_changeY = 0
 appleBulletCount = 0
 
 #Apple Stockpiles
-stockpiles = []
-stockpilesTimeouts = []
+#stockpiles = []
+#stockpilesTimeouts = []
+
+#Apple spawners
+spawners = []
 
 #rooms
 rooms = []
@@ -61,12 +64,18 @@ ammox = 0
 ammoy = 0
 enterPopupX = 0
 enterPopupY = 50
+roomX = 650
+roomY = 0
 def showammo(x,y):
     ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
     screen.blit(ammocount, (x,y))
 
 def showEnterPopup(x, y):
     popup = ammofont.render("Enter Room {0}?".format(enteringRoom), True, (0, 0, 255))
+    screen.blit(popup, (x,y))
+
+def showRoom(x, y):
+    popup = ammofont.render("Room: {0}".format(currentRoom), True, (255, 0, 0))
     screen.blit(popup, (x,y))
 
 #gets the time when the program started
@@ -172,16 +181,23 @@ def spawn_apple_pile(roomNum = currentRoom):
     x = random.randint(50, 750)
     y = random.randint(50, 550)
     s = AppleStockpiles(x, y, appleW, appleH, roomNum)
-    stockpiles.append(s)
-    draw_apple(x, y)
+    #stockpiles.append(s)
+    return s
 
 #temporary timer to automatically create stockpiles after a delay
 def check_timeouts():
-    sec = time.time()
-    for sTime in stockpilesTimeouts:
-        if sec > sTime[0] + 1:
-            spawn_apple_pile(sTime[1])
-            stockpilesTimeouts.remove(sTime)
+    sec = gettime(3)
+    #looks through all the spanwers to find timeouts. Timeouts delay the spawning of stockpiles
+    for spawner in spawners:
+        for timeout in spawner.get_timeouts():
+            if sec > timeout[0] + 1:
+                pile = spawn_apple_pile(timeout[1])
+                spawner.add_stockpile(pile)
+                spawner.remove_timeout(timeout)
+    #for sTime in stockpilesTimeouts:
+        #if sec > sTime[0] + 1:
+            #spawn_apple_pile(sTime[1])
+            #stockpilesTimeouts.remove(sTime)
 
 #checks collision between target 1 and 2. Trust me on the math
 def check_collisions(target1P, target2P):
@@ -233,8 +249,35 @@ class AppleStockpiles:
 
 #Will spawn stockpiles automatically
 class Spawners:
-    def __init__(self, type):
+    def __init__(self, type, room, max = 1):
         self.type = type
+        self.room = room
+        self.stockpiles = []
+        self.stockpileTimeouts = []
+        self.maxStockpiles = max
+        self.queuedStockpiles = 0
+    
+    def check_for_stockpiles(self, sec):
+        if (self.stockpiles.__len__() + self.queuedStockpiles < self.maxStockpiles):
+            self.queuedStockpiles += 1
+            self.stockpileTimeouts.append((sec, self.room))
+    
+    def remove_timeout(self, timeout):
+        self.stockpileTimeouts.remove(timeout)
+        self.queuedStockpiles -= 1
+
+    def add_stockpile(self, pile):
+        self.stockpiles.append(pile)
+    
+    def remove_stockpile(self, pile):
+        self.stockpiles.remove(pile)
+    
+    def get_timeouts(self):
+        return self.stockpileTimeouts
+    
+    def get_stockpiles(self):
+        return self.stockpiles
+
 
 #class for rooms
 class Rooms:
@@ -265,15 +308,24 @@ class Rooms:
         return False  
 
 #spawns an apple pile in room 1 and room 2
-spawn_apple_pile(1)
-spawn_apple_pile(2)
+#spawn_apple_pile(1)
+#spawn_apple_pile(2)
 
+#adds a bunch of rooms
 rooms.append(Rooms(1, [(4, 1), (6, 2), (2, 3)]))
 rooms.append(Rooms(2, [(1, 1), (3, 0)]))
 rooms.append(Rooms(3, [(2, 2)]))
 rooms.append(Rooms(4, [(1, 3), (5, 2)]))
 rooms.append(Rooms(5, [(4, 0), (6, 3)]))
 rooms.append(Rooms(6, [(1, 0), (5, 1)]))
+
+#adds a bunch of spawners
+spawners.append(Spawners("apple", 1))
+spawners.append(Spawners("apple", 2, 2))
+spawners.append(Spawners("apple", 3, 3))
+spawners.append(Spawners("apple", 4, 2))
+spawners.append(Spawners("apple", 5, 3))
+spawners.append(Spawners("apple", 6, 2))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -294,8 +346,6 @@ running = True
 while running:
     currentTime = gettime(12)
     delta = currentTime - lastTime
-    #creates a new stockpile if one hasn't been created
-    check_timeouts()
     #Draws Purplish background. Unneeded due to spongebob background
     #screen.fill((150,0,150))
 
@@ -367,7 +417,7 @@ while running:
                     appleBulletCount -= 1
             
             #changes the room when at an entrance. (not for testing purposes)
-            if event.key == pygame.K_r and enteringRoom != -1:
+            if event.key == pygame.K_e and enteringRoom != -1:
                 currentRoom = enteringRoom
         #handles key lifts
         if event.type == pygame.KEYUP:
@@ -424,18 +474,20 @@ while running:
         if x < 0 or x > screenWidth or y < 0 or y > screenHeight:
             bullets.remove(bullet)
             del bullet
-
-    #checks for collision for all stockpiles
-    for pile in stockpiles:
-        pos = pile.getPos()
-        if currentRoom == pile.inRoom:
-            draw_apple(pos[0], pos[1])
-            #removes a pile if collided and adds to the apple bullet count
-            if pile.checkCollision(playerX, playerY, playerW, playerH):
-                stockpilesTimeouts.append((time.time(), pile.inRoom))
-                stockpiles.remove(pile)
-                del pile
-                appleBulletCount += 1
+    
+    #checks for collision for all stockpiles in all spawners
+    for spawner in spawners:
+        spawner.check_for_stockpiles(currentTime)
+        stockpiles = spawner.get_stockpiles()
+        for pile in stockpiles:
+            pos = pile.getPos()
+            if currentRoom == pile.inRoom:
+                draw_apple(pos[0], pos[1])
+                #removes a pile if collided and adds to the apple bullet count
+                if pile.checkCollision(playerX, playerY, playerW, playerH):
+                    spawner.remove_stockpile(pile)
+                    del pile
+                    appleBulletCount += 1
 
     #checks for collisions in entrances.
     for room in rooms:
@@ -453,9 +505,14 @@ while running:
     #draws text & other assets
     showammo(ammox,ammoy)
     showtime(timex,timey)
+    showRoom(roomX, roomY)
     if (enteringRoom != -1):
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
+    
+    #checks the spawners to see if a stockpile should be created
+    check_timeouts()
+
     lastTime = currentTime
 
     pygame.display.update()
