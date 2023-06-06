@@ -124,6 +124,7 @@ def fire_apple(x, y):
     global apple_changeX
     global apple_changeY
     global bullets
+    bulletSpeed = 2000
     apple_state = "fire"
     xPos = x
     yPos = y
@@ -133,21 +134,21 @@ def fire_apple(x, y):
             yPos -= appleH
             xPos += (playerW - appleW) / 2
             apple_changeX = 0
-            apple_changeY = -7
+            apple_changeY = -bulletSpeed
         case 1:
             yPos += (playerH - appleH) / 2
             xPos += playerW + appleW
-            apple_changeX = 7
+            apple_changeX = bulletSpeed
             apple_changeY = 0
         case 2:
             yPos += playerH + appleH
             xPos += (playerW - appleW) / 2
             apple_changeX = 0
-            apple_changeY = 7
+            apple_changeY = bulletSpeed
         case 3:
             yPos += (playerH - appleH) / 2
             xPos -= appleW
-            apple_changeX = -7
+            apple_changeX = -bulletSpeed
             apple_changeY = 0
     #sets the apple bullet's position based on the direction
     appleBulletX = xPos
@@ -182,9 +183,9 @@ class AppleBullets:
         self.change_x = change_x
         self.change_y = change_y
     
-    def change(self):
-        self.x += self.change_x
-        self.y += self.change_y
+    def change(self, delta):
+        self.x += self.change_x * delta
+        self.y += self.change_y * delta
     
     def getPos(self):
         return (self.x, self.y)
@@ -258,6 +259,7 @@ stuckspeed = 0.0 * playerSpeed
 running = True
 while running:
     currentTime = gettime(12)
+    delta = currentTime - lastTime
     #creates a new stockpile if one hasn't been created
     check_timeouts()
     #Draws Purplish background. Unneeded due to spongebob background
@@ -357,8 +359,8 @@ while running:
                 playerY_change = 0
 
     #changes the player's position
-    playerX += playerX_change * (currentTime - lastTime)
-    playerY += playerY_change * (currentTime - lastTime)
+    playerX += playerX_change * delta
+    playerY += playerY_change * delta
 
     #snaps the player to a boundary
     if playerX <= 0:
@@ -372,7 +374,7 @@ while running:
     
     #Bullet movement
     for bullet in bullets:
-        bullet.change()
+        bullet.change(delta)
         pos = bullet.getPos()
         x = pos[0]
         y = pos[1]
