@@ -57,6 +57,41 @@ def showammo(x,y):
     ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
     screen.blit(ammocount, (x,y))
 
+#gets the time when the program started
+timestart = time.time()
+
+#Note: time.time() gets the time from the time their code was made; must get relative time
+
+#returns the relative time when the program started to that point in time
+#rounded to the int placed in the parameter
+def gettime(roundnum):
+    currenttime = round((time.time() - timestart),roundnum)
+    return currenttime
+
+class TimeConcept:
+    def __init__(self):
+        1 == 1
+    
+
+
+
+    global oldtime
+    oldtime = 0
+    def timeelapsed(self):
+        global oldtime
+        newtime = gettime(99)
+        elapsed = newtime - oldtime
+        oldtime = newtime
+        return elapsed
+
+#displays text for the time
+timefont = pygame.font.Font('freesansbold.ttf',32)
+timex = 0
+timey = 550
+def showtime(x,y):
+    timecount = timefont.render("Time elapsed: " + str(gettime(3)), True, (0,0,255))
+    screen.blit(timecount, (x,y))
+
 #Background
 background = pygame.Surface((screenWidth, screenHeight))
 
@@ -328,5 +363,9 @@ while running:
 
     #draws text & other assets
     showammo(ammox,ammoy)
+    showtime(timex,timey)
+
+    #test canvas (put temporary code here to run)
+
 
     pygame.display.update()
