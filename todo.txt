@@ -5,5 +5,5 @@ Camera:
 
 
 Rooms:
--Add more rooms
--make the code more efficient
+-Add more rooms?
+-make the player teleport to the correct place after entering a room (the player just stays where it is globally, not relatively)
