@@ -47,7 +47,7 @@ appleBulletCount = 0
 
 #Apple Stockpiles
 stockpiles = []
-stockpilesTimes = [-2]
+stockpilesTimeouts = []
 
 #Text
 ammofont = pygame.font.Font('freesansbold.ttf',32)
@@ -151,19 +151,19 @@ def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
 
 #spawns stockpile on cooldown
-def spawn_apple_pile():
+def spawn_apple_pile(roomNum = currentRoom):
     x = random.randint(50, 750)
     y = random.randint(50, 550)
-    s = AppleStockpiles(x, y, appleW, appleH)
+    s = AppleStockpiles(x, y, appleW, appleH, roomNum)
     stockpiles.append(s)
     draw_apple(x, y)
 
 def check_timeouts():
     sec = time.time()
-    for sTime in stockpilesTimes:
-        if sec > sTime + 1:
-            spawn_apple_pile()
-            stockpilesTimes.remove(sTime)
+    for sTime in stockpilesTimeouts:
+        if sec > sTime[0] + 1:
+            spawn_apple_pile(sTime[1])
+            stockpilesTimeouts.remove(sTime)
 
 #class for apple bullets
 class AppleBullets:
@@ -182,11 +182,12 @@ class AppleBullets:
 
 #class for apple stockpiles
 class AppleStockpiles:
-    def __init__(self, x, y, w, h):
+    def __init__(self, x, y, w, h, inRoom):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
+        self.inRoom = inRoom
     
     #checks for collision in the horizontal and vertical direction
     def checkCollision(self, pX, pY, pW, pH):
@@ -209,7 +210,8 @@ class Rooms:
     #def checkCollisions(self, pX, pY):
         #for connection in self.connections:
 
-
+spawn_apple_pile(1)
+spawn_apple_pile(2)
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -291,6 +293,10 @@ while running:
                 if appleBulletCount > 0:
                     fire_apple(playerX, playerY)
                     appleBulletCount -= 1
+            
+            #changes the room. For testing purposes
+            if event.key == pygame.K_r:
+                currentRoom = currentRoom % 2 + 1
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted given that no other key is held
@@ -350,13 +356,14 @@ while running:
     #checks for collision for all stockpiles
     for pile in stockpiles:
         pos = pile.getPos()
-        draw_apple(pos[0], pos[1])
-        #removes a pile if collided and adds to the apple bullet count
-        if pile.checkCollision(playerX, playerY, playerW, playerH):
-            stockpiles.remove(pile)
-            del pile
-            appleBulletCount += 1
-            stockpilesTimes.append(time.time())
+        if currentRoom == pile.inRoom:
+            draw_apple(pos[0], pos[1])
+            #removes a pile if collided and adds to the apple bullet count
+            if pile.checkCollision(playerX, playerY, playerW, playerH):
+                stockpilesTimeouts.append((time.time(), pile.inRoom))
+                stockpiles.remove(pile)
+                del pile
+                appleBulletCount += 1
 
     #draws the players and apples
     player(playerX, playerY)
