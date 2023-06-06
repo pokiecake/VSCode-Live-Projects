@@ -164,6 +164,8 @@ def fire_apple(x, y, mousePos = False):
                 apple_changeX = -bulletSpeed
                 apple_changeY = 0
     else:
+        #Finds the angle between the mouse and the center of the player
+        #then it fires the apple in the direction found by the angle
         centerX = playerX + playerW / 2
         centerY = playerY + playerH / 2
         xPos = centerX - appleW / 2
@@ -382,7 +384,10 @@ while running:
         if pygame.mouse.get_pressed()[0] and appleBulletCount > 0 and (bullet_state == "ready" or rapid_fire):
                 fire_apple(playerX, playerY, pygame.mouse.get_pos())
                 appleBulletCount -= 1
+                #ensures that the apple won't be released when the mouse is held down
+                #if you want to shoot while holding the mouse down, set the rapid_fire variable to true
                 bullet_state = "fired"
+        #Reloads the gun when the left mouse button is released
         elif not pygame.mouse.get_pressed()[0]:
             bullet_state = "ready"
         #handles key presses
