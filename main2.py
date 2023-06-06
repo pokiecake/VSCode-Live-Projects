@@ -4,9 +4,6 @@ import random
 import time
 import asyncio
 
-import time
-import asyncio
-
 
 # Intialize the pygame
 pygame.init()
@@ -50,6 +47,52 @@ appleBulletCount = 0
 
 #Apple Stockpiles
 stockpiles = []
+stockpilesTimeouts = []
+
+#Text
+ammofont = pygame.font.Font('freesansbold.ttf',32)
+ammox = 0
+ammoy = 0
+def showammo(x,y):
+    ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
+    screen.blit(ammocount, (x,y))
+
+#gets the time when the program started
+timestart = time.time()
+
+#Note: time.time() gets the time from the time their code was made; must get relative time
+
+#returns the relative time when the program started to that point in time
+#rounded to the int placed in the parameter
+def gettime(roundnum):
+    currenttime = round((time.time() - timestart),roundnum)
+    return currenttime
+
+
+#time class will now be used to add more functions related to time
+class TimeConcept:
+    def __init__(self):
+        1 == 1
+    
+
+
+    #the following gets the time elapsed since last call
+    global oldtime
+    oldtime = 0
+    def timeelapsed(self):
+        global oldtime
+        newtime = gettime(99)
+        elapsed = newtime - oldtime
+        oldtime = newtime
+        return elapsed
+
+#displays text for the time
+timefont = pygame.font.Font('freesansbold.ttf',32)
+timex = 0
+timey = 550
+def showtime(x,y):
+    timecount = timefont.render("Time elapsed: " + str(gettime(3)), True, (0,0,255))
+    screen.blit(timecount, (x,y))
 
 #Background
 background = pygame.Surface((screenWidth, screenHeight))
@@ -109,6 +152,21 @@ def fire_apple(x, y):
 def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
 
+#spawns stockpile on cooldown
+def spawn_apple_pile(roomNum = currentRoom):
+    x = random.randint(50, 750)
+    y = random.randint(50, 550)
+    s = AppleStockpiles(x, y, appleW, appleH, roomNum)
+    stockpiles.append(s)
+    draw_apple(x, y)
+
+def check_timeouts():
+    sec = time.time()
+    for sTime in stockpilesTimeouts:
+        if sec > sTime[0] + 1:
+            spawn_apple_pile(sTime[1])
+            stockpilesTimeouts.remove(sTime)
+
 #class for apple bullets
 class AppleBullets:
     def __init__(self, x, y, change_x, change_y):
@@ -141,6 +199,21 @@ class AppleStockpiles:
     
     def getPos(self):
         return (self.x, self.y)
+
+class Spawners:
+    def __init__(self, type):
+        self.type = type
+
+#class for rooms
+class Rooms:
+    def __init__(self, connections):
+        #connections will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
+        self.connections = connections
+    #def checkCollisions(self, pX, pY):
+        #for connection in self.connections:
+
+spawn_apple_pile(1)
+spawn_apple_pile(2)
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -285,12 +358,14 @@ while running:
     #checks for collision for all stockpiles
     for pile in stockpiles:
         pos = pile.getPos()
-        draw_apple(pos[0], pos[1])
-        #removes a pile if collided and adds to the apple bullet count
-        if pile.checkCollision(playerX, playerY, playerW, playerH):
-            stockpiles.remove(pile)
-            del pile
-            appleBulletCount += 1
+        if currentRoom == pile.inRoom:
+            draw_apple(pos[0], pos[1])
+            #removes a pile if collided and adds to the apple bullet count
+            if pile.checkCollision(playerX, playerY, playerW, playerH):
+                stockpilesTimeouts.append((time.time(), pile.inRoom))
+                stockpiles.remove(pile)
+                del pile
+                appleBulletCount += 1
 
     #draws the players and apples
     player(playerX, playerY)
