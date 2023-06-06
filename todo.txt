@@ -1,0 +1,9 @@
+Mouse tracking:
+-when clicking, the bullet shoots in the direction of the Mouse
+
+Camera:
+
+
+Rooms:
+-Add more rooms
+-make the code more efficient
