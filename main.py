@@ -29,6 +29,7 @@ playerX_change = 0
 playerY_change = 0
 playerSpeed = 3
 playerDirection = 0
+currentRoom = 1
 
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
@@ -156,6 +157,17 @@ class AppleStockpiles:
     
     def getPos(self):
         return (self.x, self.y)
+
+class Spawners:
+    def __init__(self, type):
+        self.type = type
+
+#class for rooms
+class Rooms:
+    def __init__(self, connections):
+        #connections will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
+        self.connections = connections
+
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
