@@ -56,7 +56,7 @@ spawners = []
 rooms = []
 entranceW = 100
 entranceH = 200
-enteringRoom = -1
+inEntrance = -1
 
 #Text
 ammofont = pygame.font.Font('freesansbold.ttf',32)
@@ -71,7 +71,7 @@ def showammo(x,y):
     screen.blit(ammocount, (x,y))
 
 def showEnterPopup(x, y):
-    popup = ammofont.render("Enter Room {0}?".format(enteringRoom), True, (0, 0, 255))
+    popup = ammofont.render("Enter Room {0}?".format(inEntrance[0]), True, (0, 0, 255))
     screen.blit(popup, (x,y))
 
 def showRoom(x, y):
@@ -417,8 +417,18 @@ while running:
                     appleBulletCount -= 1
             
             #changes the room when at an entrance. (not for testing purposes)
-            if event.key == pygame.K_e and enteringRoom != -1:
-                currentRoom = enteringRoom
+            if event.key == pygame.K_e and inEntrance != -1:
+                currentRoom = inEntrance[0]
+                dir = inEntrance[1]
+                match(dir):
+                    case 0:
+                        playerY = screenHeight - playerH
+                    case 1:
+                        playerX = 0
+                    case 2:
+                        playerY = 0
+                    case 3:
+                        playerX = screenWidth - playerW
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted given that no other key is held
@@ -495,9 +505,9 @@ while running:
             entrance = room.checkCollisions(playerX, playerY, playerW, playerH)
             if entrance != False:
                 #if r is pressed, the player will enter the room
-                enteringRoom = entrance[0]
+                inEntrance = entrance
             else:
-                enteringRoom = -1
+                inEntrance = -1
 
     #draws the players and apples
     player(playerX, playerY)
@@ -506,7 +516,7 @@ while running:
     showammo(ammox,ammoy)
     showtime(timex,timey)
     showRoom(roomX, roomY)
-    if (enteringRoom != -1):
+    if (inEntrance != -1):
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
     

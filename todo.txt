@@ -5,6 +5,4 @@ Camera:
 
 
 Rooms:
--Add more rooms?
--Add spawners for each room
--make the player teleport to the correct place after entering a room (the player just stays where it is globally, not relatively)
+Finished :) (for now)
