@@ -53,14 +53,21 @@ stockpilesTimeouts = []
 rooms = []
 entranceW = 100
 entranceH = 200
+enteringRoom = -1
 
 #Text
 ammofont = pygame.font.Font('freesansbold.ttf',32)
 ammox = 0
 ammoy = 0
+enterPopupX = 0
+enterPopupY = 50
 def showammo(x,y):
     ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
     screen.blit(ammocount, (x,y))
+
+def showEnterPopup(x, y):
+    popup = ammofont.render("Enter Room {0}?".format(enteringRoom), True, (0, 0, 255))
+    screen.blit(popup, (x,y))
 
 #gets the time when the program started
 timestart = time.time()
@@ -168,12 +175,26 @@ def spawn_apple_pile(roomNum = currentRoom):
     stockpiles.append(s)
     draw_apple(x, y)
 
+#temporary timer to automatically create stockpiles after a delay
 def check_timeouts():
     sec = time.time()
     for sTime in stockpilesTimeouts:
         if sec > sTime[0] + 1:
             spawn_apple_pile(sTime[1])
             stockpilesTimeouts.remove(sTime)
+
+#checks collision between target 1 and 2. Trust me on the math
+def check_collisions(target1P, target2P):
+    x1 = target1P[0]
+    y1 = target1P[1]
+    w1 = target1P[2]
+    h1 = target1P[3]
+    x2 = target2P[0]
+    y2 = target2P[1]
+    w2 = target2P[2]
+    h2 = target2P[3]
+
+    return (y2 < y1 + h1 and y2 + h2 > y1) and ((x2 < x1 + w1 and x2 + w2 > x1) or (x2 + w2 > x1 and x2 < x1 + w1))
 
 #class for apple bullets
 class AppleBullets:
@@ -201,13 +222,16 @@ class AppleStockpiles:
     
     #checks for collision in the horizontal and vertical direction
     def checkCollision(self, pX, pY, pW, pH):
-        if (pY < self.y + self.h and pY + pH > self.y):
-            if (pX < self.x + self.w and pX + pW > self.x) or (pX + pW > self.x and pX < self.x + self.w):
-                return True
+        return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
+        #I'll keep this in case we need it later
+        #if (pY < self.y + self.h and pY + pH > self.y):
+            #if (pX < self.x + self.w and pX + pW > self.x) or (pX + pW > self.x and pX < self.x + self.w):
+                #return True
     
     def getPos(self):
         return (self.x, self.y)
 
+#Will spawn stockpiles automatically
 class Spawners:
     def __init__(self, type):
         self.type = type
@@ -216,30 +240,40 @@ class Spawners:
 class Rooms:
     def __init__(self, num, entrances):
         #entrances will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
+        #the long side is dependent on where the entrance is. You can ask me to clarify if you need to -Tony
         self.num = num
         self.entrances = entrances
+        self.long = 200
+        self.short = 100
+    #If there is a collision, the entrance tuple will be returned (so that the game loop knows the entrance #)
     def checkCollisions(self, pX, pY, pW, pH):
+        target2P = [pX, pY, pW, pH]
         for entrance in self.entrances:
-            
-            #this is not efficient but I'm just doing it as a proof of concept
+            #0 = North, 1 = East, 2 = South, 3 = West
+            if (entrance[1] == 0):
+                if (check_collisions([300, 0, self.long, self.short], target2P)):
+                    return entrance
             if (entrance[1] == 1):
-                if (pY < 200 + entranceH and pY + pH > 200):
-                    if (pX < 700 + entranceW and pX + pW > 700) or (pX + pW > 700 and pX < 700 + entranceW):
-                        return entrance
+                if (check_collisions([700, 200, self.short, self.long], target2P)):
+                    return entrance
+            if (entrance[1] == 2):
+                if (check_collisions([300, 500, self.long, self.short], target2P)):
+                    return entrance
             if (entrance[1] == 3):
-                if (pY < 200 + entranceH and pY + pH > 200):
-                    if (pX < entranceW and pX + pW > 0) or (pX + pW > 0 and pX < entranceW):
-                        return entrance
-            return False
-                        
-            
+                if (check_collisions([0, 200, self.short, self.long], target2P)):
+                    return entrance
+        return False  
 
 #spawns an apple pile in room 1 and room 2
 spawn_apple_pile(1)
 spawn_apple_pile(2)
 
-rooms.append(Rooms(1, [(2, 3)]))
-rooms.append(Rooms(2, [(1, 1)]))
+rooms.append(Rooms(1, [(4, 1), (6, 2), (2, 3)]))
+rooms.append(Rooms(2, [(1, 1), (3, 0)]))
+rooms.append(Rooms(3, [(2, 2)]))
+rooms.append(Rooms(4, [(1, 3), (5, 2)]))
+rooms.append(Rooms(5, [(4, 0), (6, 3)]))
+rooms.append(Rooms(6, [(1, 0), (5, 1)]))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -273,6 +307,14 @@ while running:
             screen.blit(BGImage, (0,0))
         case 2:
             screen.fill((150, 0, 150))
+        case 3:
+            screen.fill((225, 100, 100))
+        case 4:
+            screen.fill((100, 225, 100))
+        case 5:
+            screen.fill((255, 255, 0))
+        case 6:
+            screen.fill((200, 200, 200))
 
     #event listener
     for event in pygame.event.get():
@@ -324,9 +366,9 @@ while running:
                     fire_apple(playerX, playerY)
                     appleBulletCount -= 1
             
-            #changes the room. For testing purposes
-            if event.key == pygame.K_r:
-                currentRoom = currentRoom % 2 + 1
+            #changes the room when at an entrance. (not for testing purposes)
+            if event.key == pygame.K_r and enteringRoom != -1:
+                currentRoom = enteringRoom
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted given that no other key is held
@@ -395,12 +437,15 @@ while running:
                 del pile
                 appleBulletCount += 1
 
-    #checks for collisions in entrances. Right now, moving to an entrance switches the rooms automatically
+    #checks for collisions in entrances.
     for room in rooms:
         if room.num == currentRoom:
             entrance = room.checkCollisions(playerX, playerY, playerW, playerH)
             if entrance != False:
-                currentRoom = entrance[0]
+                #if r is pressed, the player will enter the room
+                enteringRoom = entrance[0]
+            else:
+                enteringRoom = -1
 
     #draws the players and apples
     player(playerX, playerY)
@@ -408,7 +453,8 @@ while running:
     #draws text & other assets
     showammo(ammox,ammoy)
     showtime(timex,timey)
-
+    if (enteringRoom != -1):
+        showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
     lastTime = currentTime
 
