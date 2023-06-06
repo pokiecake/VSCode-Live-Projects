@@ -27,7 +27,7 @@ playerX = 370
 playerY = 350
 playerX_change = 0
 playerY_change = 0
-playerSpeed = 3
+playerSpeed = 500
 playerDirection = 0
 currentRoom = 1
 
@@ -95,6 +95,8 @@ class TimeConcept:
 timefont = pygame.font.Font('freesansbold.ttf',32)
 timex = 0
 timey = 550
+lastTime = 0
+currentTime = 0
 def showtime(x,y):
     timecount = timefont.render("Time elapsed: " + str(gettime(3)), True, (0,0,255))
     screen.blit(timecount, (x,y))
@@ -255,6 +257,7 @@ stuckspeed = 0.0 * playerSpeed
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
 while running:
+    currentTime = gettime(12)
     #creates a new stockpile if one hasn't been created
     check_timeouts()
     #Draws Purplish background. Unneeded due to spongebob background
@@ -354,8 +357,8 @@ while running:
                 playerY_change = 0
 
     #changes the player's position
-    playerX += playerX_change
-    playerY += playerY_change
+    playerX += playerX_change * (currentTime - lastTime)
+    playerY += playerY_change * (currentTime - lastTime)
 
     #snaps the player to a boundary
     if playerX <= 0:
@@ -390,10 +393,10 @@ while running:
                 del pile
                 appleBulletCount += 1
 
+    #checks for collisions in entrances. Right now, moving to an entrance switches the rooms automatically
     for room in rooms:
         if room.num == currentRoom:
             entrance = room.checkCollisions(playerX, playerY, playerW, playerH)
-            #this will not work for multipler rooms
             if entrance != False:
                 currentRoom = entrance[0]
 
@@ -405,6 +408,6 @@ while running:
     showtime(timex,timey)
 
     #test canvas (put temporary code here to run)
-
+    lastTime = currentTime
 
     pygame.display.update()
