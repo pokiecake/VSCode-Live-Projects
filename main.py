@@ -3,6 +3,7 @@ from pygame import mixer
 import random
 import time
 import asyncio
+import math
 
 
 # Intialize the pygame
@@ -37,12 +38,9 @@ appleW = appleImg.get_width()
 appleH = appleImg.get_height()
 
 #Apple Bullets
-apple_state = "ready"
+bullet_state = "ready"
+rapid_fire = False
 bullets = []
-appleBulletX = 0
-appleBulletY = 0
-apple_changeX = 0
-apple_changeY = 0
 appleBulletCount = 0
 
 #Apple Stockpiles
@@ -133,42 +131,51 @@ def apple(x, y):
     screen.blit(appleImg, (x, y))
 
 #doesn't actually fire apples, only creates them and their positions
-def fire_apple(x, y):
+def fire_apple(x, y, mousePos = False):
     global apple_state
-    global appleBulletX
-    global appleBulletY
-    global apple_changeX
-    global apple_changeY
+    apple_changeX = 0
+    apple_changeY = 0
     global bullets
     bulletSpeed = 2000
     apple_state = "fire"
     xPos = x
     yPos = y
-    #0 is up, 1 is right, 2 is down, 3 is left
-    match(playerDirection):
-        case 0:
-            yPos -= appleH
-            xPos += (playerW - appleW) / 2
-            apple_changeX = 0
-            apple_changeY = -bulletSpeed
-        case 1:
-            yPos += (playerH - appleH) / 2
-            xPos += playerW + appleW
-            apple_changeX = bulletSpeed
-            apple_changeY = 0
-        case 2:
-            yPos += playerH + appleH
-            xPos += (playerW - appleW) / 2
-            apple_changeX = 0
-            apple_changeY = bulletSpeed
-        case 3:
-            yPos += (playerH - appleH) / 2
-            xPos -= appleW
-            apple_changeX = -bulletSpeed
-            apple_changeY = 0
+    if mousePos == False:
+        #0 is up, 1 is right, 2 is down, 3 is left
+        match(playerDirection):
+            case 0:
+                yPos -= appleH
+                xPos += (playerW - appleW) / 2
+                apple_changeX = 0
+                apple_changeY = -bulletSpeed
+            case 1:
+                yPos += (playerH - appleH) / 2
+                xPos += playerW + appleW
+                apple_changeX = bulletSpeed
+                apple_changeY = 0
+            case 2:
+                yPos += playerH + appleH
+                xPos += (playerW - appleW) / 2
+                apple_changeX = 0
+                apple_changeY = bulletSpeed
+            case 3:
+                yPos += (playerH - appleH) / 2
+                xPos -= appleW
+                apple_changeX = -bulletSpeed
+                apple_changeY = 0
+    else:
+        centerX = playerX + playerW / 2
+        centerY = playerY + playerH / 2
+        xPos = centerX - appleW / 2
+        yPos = centerY - appleH / 2
+        deltaX = mousePos[0] - centerX
+        deltaY = mousePos[1] - centerY
+        dirX = 1 if deltaX > 0 else -1
+        dirY = 1 if deltaY > 0 else -1
+        angle = abs(math.atan((deltaY) / (deltaX)))
+        apple_changeX = math.cos(angle) * bulletSpeed * dirX
+        apple_changeY = math.sin(angle) * bulletSpeed * dirY
     #sets the apple bullet's position based on the direction
-    appleBulletX = xPos
-    appleBulletY = yPos
     bullet = AppleBullets(xPos, yPos, apple_changeX, apple_changeY)
     bullets.append(bullet)
 
@@ -371,6 +378,13 @@ while running:
         #stops the game when the x button is pressed
         if event.type == pygame.QUIT:
             running = False
+        #shoots an apple in the direction of the cursor
+        if pygame.mouse.get_pressed()[0] and appleBulletCount > 0 and (bullet_state == "ready" or rapid_fire):
+                fire_apple(playerX, playerY, pygame.mouse.get_pos())
+                appleBulletCount -= 1
+                bullet_state = "fired"
+        elif not pygame.mouse.get_pressed()[0]:
+            bullet_state = "ready"
         #handles key presses
         if event.type == pygame.KEYDOWN:
             #sets the x and y changes based on what is pressed
