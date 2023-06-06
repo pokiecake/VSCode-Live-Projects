@@ -49,6 +49,14 @@ appleBulletCount = 0
 stockpiles = []
 stockpilesTimes = [-2]
 
+#Text
+ammofont = pygame.font.Font('freesansbold.ttf',32)
+ammox = 0
+ammoy = 0
+def showammo(x,y):
+    ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
+    screen.blit(ammocount, (x,y))
+
 #Background
 background = pygame.Surface((screenWidth, screenHeight))
 
@@ -174,7 +182,7 @@ mixer.music.set_volume(0.2)
 mixer.music.play(-1)
 
 #Global Variable Setup
-#Key Press Status & Contradict Speed (held down or not)
+#Key Press Status (held down or not)
 lefthold = False
 righthold = False
 uphold = False
@@ -207,6 +215,7 @@ while running:
         #handles key presses
         if event.type == pygame.KEYDOWN:
             #sets the x and y changes based on what is pressed
+            #sets status of hold on the key to true
             #if both opposite directions are held, player moves slower at rate of stuckspeed
             if event.key == pygame.K_LEFT and righthold == False:
                 playerX_change = -playerSpeed
@@ -250,6 +259,7 @@ while running:
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted given that no other key is held
+            #sets status of hold on the key to false
             #if the other direction is held, direction immediately switches to match
             if event.key == pygame.K_LEFT and righthold == True:
                 playerX_change = playerSpeed
@@ -315,4 +325,8 @@ while running:
 
     #draws the players and apples
     player(playerX, playerY)
+
+    #draws text & other assets
+    showammo(ammox,ammoy)
+
     pygame.display.update()
