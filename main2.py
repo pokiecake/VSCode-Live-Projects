@@ -222,11 +222,12 @@ class Rooms:
             if (entrance[1] == 1):
                 if (pY < 200 + entranceH and pY + pH > 200):
                     if (pX < 700 + entranceW and pX + pW > 700) or (pX + pW > 700 and pX < 700 + entranceW):
-                        return True
+                        return entrance
             if (entrance[1] == 3):
                 if (pY < 200 + entranceH and pY + pH > 200):
                     if (pX < entranceW and pX + pW > 0) or (pX + pW > 0 and pX < entranceW):
-                        return True
+                        return entrance
+                        
             
 
 #spawns an apple pile in room 1 and room 2

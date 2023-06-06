@@ -49,6 +49,11 @@ appleBulletCount = 0
 stockpiles = []
 stockpilesTimeouts = []
 
+#rooms
+rooms = []
+entranceW = 100
+entranceH = 200
+
 #Text
 ammofont = pygame.font.Font('freesansbold.ttf',32)
 ammox = 0
@@ -206,14 +211,32 @@ class Spawners:
 
 #class for rooms
 class Rooms:
-    def __init__(self, connections):
-        #connections will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
-        self.connections = connections
-    #def checkCollisions(self, pX, pY):
-        #for connection in self.connections:
+    def __init__(self, num, entrances):
+        #entrances will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
+        self.num = num
+        self.entrances = entrances
+    def checkCollisions(self, pX, pY, pW, pH):
+        for entrance in self.entrances:
+            
+            #this is not efficient but I'm just doing it as a proof of concept
+            if (entrance[1] == 1):
+                if (pY < 200 + entranceH and pY + pH > 200):
+                    if (pX < 700 + entranceW and pX + pW > 700) or (pX + pW > 700 and pX < 700 + entranceW):
+                        return entrance
+            if (entrance[1] == 3):
+                if (pY < 200 + entranceH and pY + pH > 200):
+                    if (pX < entranceW and pX + pW > 0) or (pX + pW > 0 and pX < entranceW):
+                        return entrance
+            return False
+                        
+            
 
+#spawns an apple pile in room 1 and room 2
 spawn_apple_pile(1)
 spawn_apple_pile(2)
+
+rooms.append(Rooms(1, [(2, 3)]))
+rooms.append(Rooms(2, [(1, 1)]))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -366,6 +389,13 @@ while running:
                 stockpiles.remove(pile)
                 del pile
                 appleBulletCount += 1
+
+    for room in rooms:
+        if room.num == currentRoom:
+            entrance = room.checkCollisions(playerX, playerY, playerW, playerH)
+            #this will not work for multipler rooms
+            if entrance != False:
+                currentRoom = entrance[0]
 
     #draws the players and apples
     player(playerX, playerY)
