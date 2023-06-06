@@ -125,25 +125,21 @@ def fire_apple(x, y):
             xPos += (playerW - appleW) / 2
             apple_changeX = 0
             apple_changeY = -7
-            pass
         case 1:
             yPos += (playerH - appleH) / 2
             xPos += playerW + appleW
             apple_changeX = 7
             apple_changeY = 0
-            pass
         case 2:
             yPos += playerH + appleH
             xPos += (playerW - appleW) / 2
             apple_changeX = 0
             apple_changeY = 7
-            pass
         case 3:
             yPos += (playerH - appleH) / 2
             xPos -= appleW
             apple_changeX = -7
             apple_changeY = 0
-            pass
     #sets the apple bullet's position based on the direction
     appleBulletX = xPos
     appleBulletY = yPos
@@ -210,6 +206,9 @@ class Rooms:
     def __init__(self, connections):
         #connections will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
         self.connections = connections
+    #def checkCollisions(self, pX, pY):
+        #for connection in self.connections:
+
 
 
 #background sound
@@ -237,10 +236,11 @@ while running:
     #draws spongebob background
     #pygame.transform.scale_by(BGImage,20)
     #screen.blit(background, (0,0))
-    screen.blit(BGImage, (0,0))
-
-    
-
+    match(currentRoom):
+        case 1:
+            screen.blit(BGImage, (0,0))
+        case 2:
+            screen.fill((150, 0, 150))
 
     #event listener
     for event in pygame.event.get():
