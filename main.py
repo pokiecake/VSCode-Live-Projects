@@ -68,13 +68,15 @@ def gettime(roundnum):
     currenttime = round((time.time() - timestart),roundnum)
     return currenttime
 
+
+#time class will now be used to add more functions related to time
 class TimeConcept:
     def __init__(self):
         1 == 1
     
 
 
-
+    #the following gets the time elapsed since last call
     global oldtime
     oldtime = 0
     def timeelapsed(self):

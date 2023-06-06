@@ -1,6 +1,9 @@
 import pygame
 from pygame import mixer
 import random
+import time
+import asyncio
+
 
 # Intialize the pygame
 pygame.init()
@@ -16,15 +19,17 @@ icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
 
 #Player
-playerImg = pygame.image.load("Assets/player.png")
+playerImg = pygame.image.load("Sprites/bob.png")
+playerImg = pygame.transform.scale(playerImg,(125,196))
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
 playerY = 350
 playerX_change = 0
 playerY_change = 0
-playerSpeed = 2
+playerSpeed = 3
 playerDirection = 0
+currentRoom = 1
 
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
@@ -42,9 +47,61 @@ appleBulletCount = 0
 
 #Apple Stockpiles
 stockpiles = []
+stockpilesTimes = [-2]
+
+#Text
+ammofont = pygame.font.Font('freesansbold.ttf',32)
+ammox = 0
+ammoy = 0
+def showammo(x,y):
+    ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
+    screen.blit(ammocount, (x,y))
+
+#gets the time when the program started
+timestart = time.time()
+
+#Note: time.time() gets the time from the time their code was made; must get relative time
+
+#returns the relative time when the program started to that point in time
+#rounded to the int placed in the parameter
+def gettime(roundnum):
+    currenttime = round((time.time() - timestart),roundnum)
+    return currenttime
+
+
+#time class will now be used to add more functions related to time
+class TimeConcept:
+    def __init__(self):
+        1 == 1
+    
+
+
+    #the following gets the time elapsed since last call
+    global oldtime
+    oldtime = 0
+    def timeelapsed(self):
+        global oldtime
+        newtime = gettime(99)
+        elapsed = newtime - oldtime
+        oldtime = newtime
+        return elapsed
+
+#displays text for the time
+timefont = pygame.font.Font('freesansbold.ttf',32)
+timex = 0
+timey = 550
+def showtime(x,y):
+    timecount = timefont.render("Time elapsed: " + str(gettime(3)), True, (0,0,255))
+    screen.blit(timecount, (x,y))
 
 #Background
-background = pygame.image.load("Assets/spongebob.png")
+background = pygame.Surface((screenWidth, screenHeight))
+
+BGImage = pygame.image.load("Assets/spongebob.png")
+
+BGImage = pygame.transform.scale(BGImage,(screenWidth, screenHeight))
+
+# camera setup
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -66,29 +123,25 @@ def fire_apple(x, y):
     #0 is up, 1 is right, 2 is down, 3 is left
     match(playerDirection):
         case 0:
-            yPos -= 25
-            xPos += 25
+            yPos -= appleH
+            xPos += (playerW - appleW) / 2
             apple_changeX = 0
             apple_changeY = -7
-            pass
         case 1:
-            yPos += 50
-            xPos += 30
+            yPos += (playerH - appleH) / 2
+            xPos += playerW + appleW
             apple_changeX = 7
             apple_changeY = 0
-            pass
         case 2:
-            yPos += 150
-            xPos += 25
+            yPos += playerH + appleH
+            xPos += (playerW - appleW) / 2
             apple_changeX = 0
             apple_changeY = 7
-            pass
         case 3:
-            yPos += 50
-            xPos -= 10
+            yPos += (playerH - appleH) / 2
+            xPos -= appleW
             apple_changeX = -7
             apple_changeY = 0
-            pass
     #sets the apple bullet's position based on the direction
     appleBulletX = xPos
     appleBulletY = yPos
@@ -98,6 +151,21 @@ def fire_apple(x, y):
 #draws anything apple related
 def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
+
+#spawns stockpile on cooldown
+def spawn_apple_pile():
+    x = random.randint(50, 750)
+    y = random.randint(50, 550)
+    s = AppleStockpiles(x, y, appleW, appleH)
+    stockpiles.append(s)
+    draw_apple(x, y)
+
+def check_timeouts():
+    sec = time.time()
+    for sTime in stockpilesTimes:
+        if sec > sTime + 1:
+            spawn_apple_pile()
+            stockpilesTimes.remove(sTime)
 
 #class for apple bullets
 class AppleBullets:
@@ -131,8 +199,22 @@ class AppleStockpiles:
     def getPos(self):
         return (self.x, self.y)
 
+class Spawners:
+    def __init__(self, type):
+        self.type = type
+
+#class for rooms
+class Rooms:
+    def __init__(self, connections):
+        #connections will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
+        self.connections = connections
+    #def checkCollisions(self, pX, pY):
+        #for connection in self.connections:
+
+
+
 #background sound
-mixer.music.load('Assets/Clouds.wav')
+mixer.music.load('Assets/Sky.wav')
 mixer.music.set_volume(0.2)
 mixer.music.play(-1)
 
@@ -142,19 +224,25 @@ lefthold = False
 righthold = False
 uphold = False
 downhold = False
+#Controls speed when both opposite buttons pressed
+stuckspeed = 0.0 * playerSpeed
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
 while running:
     #creates a new stockpile if one hasn't been created
-    if stockpiles.__len__() == 0:
-        s = AppleStockpiles(random.randint(50, 750), random.randint(50, 550), appleW, appleH)
-        stockpiles.append(s)
+    check_timeouts()
     #Draws Purplish background. Unneeded due to spongebob background
-    screen.fill((150,0,150))
+    #screen.fill((150,0,150))
 
     #draws spongebob background
-    screen.blit(background, (75,100))
+    #pygame.transform.scale_by(BGImage,20)
+    #screen.blit(background, (0,0))
+    match(currentRoom):
+        case 1:
+            screen.blit(BGImage, (0,0))
+        case 2:
+            screen.fill((150, 0, 150))
 
     #event listener
     for event in pygame.event.get():
@@ -164,31 +252,32 @@ while running:
         #handles key presses
         if event.type == pygame.KEYDOWN:
             #sets the x and y changes based on what is pressed
-            #if both opposite directions are held, player stops
+            #sets status of hold on the key to true
+            #if both opposite directions are held, player moves slower at rate of stuckspeed
             if event.key == pygame.K_LEFT and righthold == False:
                 playerX_change = -playerSpeed
                 lefthold = True
             elif event.key == pygame.K_LEFT and righthold == True:
-                playerX_change = 0
+                playerX_change = stuckspeed
                 lefthold = True
             if event.key == pygame.K_RIGHT and lefthold == False:
                 playerX_change = playerSpeed
                 righthold = True
             elif event.key == pygame.K_RIGHT and lefthold == True:
-                playerX_change = 0
+                playerX_change = -stuckspeed
                 righthold = True
 
             if event.key == pygame.K_UP and downhold == False:
                 playerY_change = -playerSpeed
                 uphold = True
             elif event.key == pygame.K_UP and downhold == True:
-                playerY_change = 0
+                playerY_change = stuckspeed
                 uphold = True
             if event.key == pygame.K_DOWN and uphold == False:
                 playerY_change = playerSpeed
                 downhold = True
             elif event.key == pygame.K_DOWN and uphold == True:
-                playerY_change = 0
+                playerY_change = -stuckspeed
                 downhold = True
             
             #changes the direction of the player's shooting
@@ -201,12 +290,13 @@ while running:
             if event.key == pygame.K_a:
                 playerDirection = 3
             if event.key == pygame.K_SPACE:
-                if appleBulletCount > 1:
+                if appleBulletCount > 0:
                     fire_apple(playerX, playerY)
                     appleBulletCount -= 1
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted given that no other key is held
+            #sets status of hold on the key to false
             #if the other direction is held, direction immediately switches to match
             if event.key == pygame.K_LEFT and righthold == True:
                 playerX_change = playerSpeed
@@ -268,7 +358,16 @@ while running:
             stockpiles.remove(pile)
             del pile
             appleBulletCount += 1
+            stockpilesTimes.append(time.time())
 
     #draws the players and apples
     player(playerX, playerY)
+
+    #draws text & other assets
+    showammo(ammox,ammoy)
+    showtime(timex,timey)
+
+    #test canvas (put temporary code here to run)
+
+
     pygame.display.update()
