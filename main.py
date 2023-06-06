@@ -96,14 +96,73 @@ class TimeConcept:
 
 
     #the following gets the time elapsed since last call
-    global oldtime
-    oldtime = 0
+    #oldtime1 is oldtime for cooldowns, oldtime2 is oldtime for time windows
+    global oldtime1
+    global oldtime2
+    oldtime2 = 0
+    oldtime1 = 0
     def timeelapsed(self):
-        global oldtime
+        global oldtime1
         newtime = gettime(99)
-        elapsed = newtime - oldtime
-        oldtime = newtime
+        elapsed = newtime - oldtime1
         return elapsed
+    
+    def cooldown(self, amount):
+        global oldtime1
+        
+        timepassed = self.timeelapsed()
+        if timepassed >= amount:
+            oldtime1 = gettime(99)
+            return True
+        else:
+            return False
+
+    def timewindow(self, amount):
+        global oldtime2
+        
+        timepassed = gettime(99) - oldtime2
+        if timepassed >= amount:
+            oldtime2 = gettime(99)
+            return False
+        else:
+            oldtime2 = gettime(99)
+            return True
+
+#temporary speed function; makes the temporary speed decay over time
+tempspeed = 0
+collectivetime = 0
+def calcspeed(change):
+    global tempspeed
+    global delta
+    global collectivetime
+    collectivetime = collectivetime + delta
+    if tempspeed > 0 and change != 0:
+        if tempspeed < 1:
+            tempspeed = 0
+        retvalue = tempspeed
+        tempspeed = (tempspeed * (0.5/collectivetime))
+        if tempspeed > playerSpeed * 2:
+            tempspeed = playerSpeed * 2
+        if change > 0:
+            return retvalue
+        elif change < 0:
+            return -retvalue
+        
+    elif tempspeed == 0:
+        collectivetime = 0
+        return 0
+    else:
+        return 0
+
+#calculates whether the current value is positive or negative and returns 1 or -1 respectively
+def calcsign(num):
+    if num > 0:
+        return 1
+    elif num < 0:
+        return -1
+    else:
+        return 0
+
 
 #displays text for the time
 timefont = pygame.font.Font('freesansbold.ttf',32)
@@ -347,6 +406,7 @@ lefthold = False
 righthold = False
 uphold = False
 downhold = False
+lastkey = ""
 #Controls speed when both opposite buttons pressed
 stuckspeed = 0.0 * playerSpeed
 
@@ -421,6 +481,16 @@ while running:
                 playerY_change = -stuckspeed
                 downhold = True
             
+            #testing key presses here
+            dash = TimeConcept()
+            if dash.timewindow(0.5) and lastkey == event.key:
+                tempspeed = playerSpeed
+
+            else:
+                1==1
+
+            lastkey = event.key
+
             #changes the direction of the player's shooting
             if event.key == pygame.K_w:
                 playerDirection = 0
@@ -479,6 +549,9 @@ while running:
                 uphold = False
                 playerY_change = 0
 
+    #x and y change accounting for temporary speed
+    playerX_change = playerSpeed * calcsign(playerX_change) + calcspeed(playerX_change)
+    playerY_change = playerSpeed * calcsign(playerY_change) + calcspeed(playerY_change)
     #changes the player's position
     playerX += playerX_change * delta
     playerY += playerY_change * delta
