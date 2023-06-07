@@ -48,8 +48,8 @@ appleBulletCount = 0
 #stockpilesTimeouts = []
 
 #Enemies
-enemyImg = pygame.image.load("Assets/Banana.png")
-enemyImg = pygame.transform.scale(enemyImg, (100, 100))
+enemyImg = pygame.image.load("Sprites/fob.png")
+enemyImg = pygame.transform.scale(enemyImg, (125,196))
 enemyW = enemyImg.get_width()
 enemyH = enemyImg.get_height()
 enemies = []
