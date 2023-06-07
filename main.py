@@ -273,6 +273,12 @@ def check_timeouts():
                 pile = spawn_apple_pile(timeout[1])
                 spawner.add_stockpile(pile)
                 spawner.remove_timeout(timeout)
+    for enemy in enemies:
+        for timeout in enemy.timeouts:
+            initialSec = timeout[1]
+            cooldown = timeout[2]
+            if sec > initialSec + cooldown:
+                enemy.start_move(timeout)
     #for sTime in stockpilesTimeouts:
         #if sec > sTime[0] + 1:
             #spawn_apple_pile(sTime[1])
@@ -290,6 +296,14 @@ def check_collisions(target1P, target2P):
     h2 = target2P[3]
 
     return (y2 < y1 + h1 and y2 + h2 > y1) and ((x2 < x1 + w1 and x2 + w2 > x1) or (x2 + w2 > x1 and x2 < x1 + w1))
+
+def find_angle(pos1, pos2):
+    deltaX = pos2[0] - pos1[0]
+    deltaY = pos2[1] - pos1[1]
+    dirX = 1 if deltaX > 0 else -1
+    dirY = 1 if deltaY > 0 else -1
+    angle = abs(math.atan((deltaY) / (deltaX)))
+    return (angle, dirX, dirY)
 
 #class for apple bullets
 class AppleBullets:
@@ -331,12 +345,46 @@ class AppleStockpiles:
 #Class for enemies
 class Enemies:
     def __init__(self, x, y, w, h, inRoom):
+        self.initialX = x
+        self.initialY = y
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.inRoom = inRoom
+        self.change_x = 0
+        self.change_y = 0
+        self.timeouts = []
+        self.move_queued = False
+        self.moving = False
+        self.speed = 100
     
+    def reset_pos(self):
+        self.x = self.initialX
+        self.y = self.initialY
+
+    def move(self):
+        self.x += self.change_x
+        self.y += self.change_y
+
+    def queue_move(self, sec):
+        if (not self.moving):
+            self.move_queued = True
+            random_pos = (random.randint(0, screenWidth - self.w), random.randint(0, screenHeight - self.h))
+            self.timeouts.append(((random_pos), sec, 3))
+            print("move queued")
+    
+    def start_move(self, timeout):
+        self.move_queued = False
+        self.moving = True
+        targetPos = timeout[0]
+        angle_and_dir = find_angle((self.x, self.y), targetPos)
+        angle = angle_and_dir[0]
+        dirX = angle_and_dir[1]
+        dirY = angle_and_dir[2]
+        self.change_x = math.cos(angle) * self.speed * dirX
+        self.change_y = math.sin(angle) * self.speed * dirY
+
     def checkCollision(self, pX, pY, pW, pH):
         return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
 
@@ -607,8 +655,10 @@ while running:
     
     #checks collision for enemies
     for enemy in enemies:
+        enemy.move()
         if enemy.inRoom == currentRoom:
             draw(enemyImg, enemy.x, enemy.y)
+            enemy.queue_move(currentTime)
             if (enemy.checkCollision(playerX, playerY, playerW, playerH)):
                 print("collided with enemy")
             for bullet in bullets:
@@ -617,6 +667,8 @@ while running:
                     enemies.remove(enemy)
                     del enemy
                     break
+        else:
+            enemy.reset_pos()
 
     #checks for collision for all stockpiles in all spawners
     for spawner in spawners:
