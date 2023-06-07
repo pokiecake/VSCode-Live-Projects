@@ -315,6 +315,14 @@ class AppleStockpiles:
     def getPos(self):
         return (self.x, self.y)
 
+class Enemies:
+    def __init__(self, x, y, w, h, inRoom):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.inRoom = inRoom
+
 #Will spawn stockpiles automatically
 class Spawners:
     def __init__(self, type, room, max = 1):
