@@ -47,6 +47,13 @@ appleBulletCount = 0
 #stockpiles = []
 #stockpilesTimeouts = []
 
+#Enemies
+enemyImg = pygame.image.load("Assets/Banana.png")
+enemyImg = pygame.transform.scale(enemyImg, (100, 100))
+enemyW = enemyImg.get_width()
+enemyH = enemyImg.get_height()
+enemies = []
+
 #Apple spawners
 spawners = []
 
@@ -237,12 +244,16 @@ def fire_apple(x, y, mousePos = False):
         apple_changeX = math.cos(angle) * bulletSpeed * dirX
         apple_changeY = math.sin(angle) * bulletSpeed * dirY
     #sets the apple bullet's position based on the direction
-    bullet = AppleBullets(xPos, yPos, apple_changeX, apple_changeY)
+    bullet = AppleBullets(xPos, yPos, appleW, appleH, apple_changeX, apple_changeY)
     bullets.append(bullet)
 
 #draws anything apple related
 def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
+
+#draws anything
+def draw(img, x, y):
+    screen.blit(img, (x, y))
 
 #spawns stockpile on cooldown
 def spawn_apple_pile(roomNum = currentRoom):
@@ -282,9 +293,11 @@ def check_collisions(target1P, target2P):
 
 #class for apple bullets
 class AppleBullets:
-    def __init__(self, x, y, change_x, change_y):
+    def __init__(self, x, y, w, h, change_x, change_y):
         self.x = x
         self.y = y
+        self.w = w
+        self.h = h
         self.change_x = change_x
         self.change_y = change_y
     
@@ -322,6 +335,9 @@ class Enemies:
         self.w = w
         self.h = h
         self.inRoom = inRoom
+    
+    def checkCollision(self, pX, pY, pW, pH):
+        return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
 
 #Will spawn stockpiles automatically
 class Spawners:
@@ -402,6 +418,9 @@ spawners.append(Spawners("apple", 3, 3))
 spawners.append(Spawners("apple", 4, 2))
 spawners.append(Spawners("apple", 5, 3))
 spawners.append(Spawners("apple", 6, 2))
+
+#adds enemies
+enemies.append(Enemies(0, 200, enemyW, enemyH, 3))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -585,6 +604,18 @@ while running:
             bullets.remove(bullet)
             del bullet
     
+    for enemy in enemies:
+        if enemy.inRoom == currentRoom:
+            draw(enemyImg, enemy.x, enemy.y)
+            if (enemy.checkCollision(playerX, playerY, playerW, playerH)):
+                print("collided with enemy")
+            for bullet in bullets:
+                if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
+                    print("bullet hit enemy")
+                    enemies.remove(enemy)
+                    del enemy
+                    break
+
     #checks for collision for all stockpiles in all spawners
     for spawner in spawners:
         spawner.check_for_stockpiles(currentTime)
