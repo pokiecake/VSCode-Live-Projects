@@ -351,24 +351,36 @@ class Enemies:
         self.y = y
         self.w = w
         self.h = h
+        self.targetPos = (0, 0)
+        self.dir = (0, 0)
         self.inRoom = inRoom
         self.change_x = 0
         self.change_y = 0
         self.timeouts = []
         self.move_queued = False
         self.moving = False
-        self.speed = 100
+        self.speed = 500
     
     def reset_pos(self):
         self.x = self.initialX
         self.y = self.initialY
 
-    def move(self):
-        self.x += self.change_x
-        self.y += self.change_y
+    def move(self, delta):
+        self.x += self.change_x  * delta
+        self.y += self.change_y * delta
+        if (self.x * self.dir[0] >= self.targetPos[0] * self.dir[0]):
+            self.change_x = False
+            self.x = self.targetPos[0]
+        if (self.y * self.dir[1] >= self.targetPos[1] * self.dir[1]):
+            self.change_y = False
+            self.y = self.targetPos[1]
+        if (not self.change_x and not self.change_y):
+            self.moving = False
+        #print((self.x, self.y))
+       # print((self.change_x, self.change_y))
 
     def queue_move(self, sec):
-        if (not self.moving):
+        if (not self.moving and not self.move_queued):
             self.move_queued = True
             random_pos = (random.randint(0, screenWidth - self.w), random.randint(0, screenHeight - self.h))
             self.timeouts.append(((random_pos), sec, 3))
@@ -377,13 +389,15 @@ class Enemies:
     def start_move(self, timeout):
         self.move_queued = False
         self.moving = True
-        targetPos = timeout[0]
-        angle_and_dir = find_angle((self.x, self.y), targetPos)
+        self.targetPos = timeout[0]
+        angle_and_dir = find_angle((self.x, self.y), self.targetPos)
         angle = angle_and_dir[0]
         dirX = angle_and_dir[1]
         dirY = angle_and_dir[2]
+        self.dir = (dirX, dirY)
         self.change_x = math.cos(angle) * self.speed * dirX
         self.change_y = math.sin(angle) * self.speed * dirY
+        self.timeouts.remove(timeout)
 
     def checkCollision(self, pX, pY, pW, pH):
         return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
@@ -655,7 +669,7 @@ while running:
     
     #checks collision for enemies
     for enemy in enemies:
-        enemy.move()
+        enemy.move(delta)
         if enemy.inRoom == currentRoom:
             draw(enemyImg, enemy.x, enemy.y)
             enemy.queue_move(currentTime)
