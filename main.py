@@ -328,6 +328,7 @@ class AppleStockpiles:
     def getPos(self):
         return (self.x, self.y)
 
+#Class for enemies
 class Enemies:
     def __init__(self, x, y, w, h, inRoom):
         self.x = x
@@ -339,7 +340,7 @@ class Enemies:
     def checkCollision(self, pX, pY, pW, pH):
         return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
 
-#Will spawn stockpiles automatically
+#Will spawn stockpiles and enemies automatically
 class Spawners:
     def __init__(self, type, room, max = 1):
         self.type = type
@@ -604,6 +605,7 @@ while running:
             bullets.remove(bullet)
             del bullet
     
+    #checks collision for enemies
     for enemy in enemies:
         if enemy.inRoom == currentRoom:
             draw(enemyImg, enemy.x, enemy.y)
