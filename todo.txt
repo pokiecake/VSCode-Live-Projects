@@ -1,8 +1,27 @@
 Mouse tracking:
--when clicking, the bullet shoots in the direction of the Mouse
+Done!
 
 Camera:
-
+Gave up?
 
 Rooms:
 Finished :) (for now)
+-Maybe more rooms?
+-Bigger rooms? (requires camera movement)
+
+Enemies:
+-Spawn in some of the rooms
+-Kill them when shot with apples
+-Boss?
+
+Weapons:
+-different types of bullets (I have made sprites of other fruit)
+-Maybe a sword?
+
+Lives/Health:
+-just a health bar or lives counter
+
+Goal:
+-Kill enemies, don't die
+-Reach a certain room
+-Shoot targets
