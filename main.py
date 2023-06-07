@@ -359,7 +359,7 @@ class Enemies:
         self.timeouts = []
         self.move_queued = False
         self.moving = False
-        self.speed = 500
+        self.speed = 400
     
     def reset_pos(self):
         self.x = self.initialX
