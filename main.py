@@ -143,7 +143,7 @@ def calcspeed(change):
     global delta
     global collectivetime
     collectivetime = collectivetime + delta
-    if tempspeed > 0 and change != 0:
+    if tempspeed > 0 and change != 0 and collectivetime != 0:
         if tempspeed < 1:
             tempspeed = 0
         retvalue = tempspeed
@@ -288,15 +288,17 @@ def check_timeouts():
                     spawner.remove_timeout(timeout)
                 else:
                     print("type not recognized")
-    for enemy in enemies:
-        for timeout in enemy.timeouts:
-            if enemy.inRoom != currentRoom:
-                enemy.timeouts.remove(timeout)
-            else:
-                initialSec = timeout[1]
-                cooldown = timeout[2]
-                if sec > initialSec + cooldown:
-                    enemy.start_move(timeout)
+        if spawner.type == "enemy":
+            enemies = spawner.get_items()
+            for enemy in enemies:
+                for timeout in enemy.timeouts:
+                    if enemy.inRoom != currentRoom:
+                        enemy.timeouts.remove(timeout)
+                    else:
+                        initialSec = timeout[1]
+                        cooldown = timeout[2]
+                        if sec > initialSec + cooldown:
+                            enemy.start_move(timeout)
     #for sTime in stockpilesTimeouts:
         #if sec > sTime[0] + 1:
             #spawn_apple_pile(sTime[1])
@@ -499,12 +501,22 @@ class Rooms:
 #spawn_apple_pile(2)
 
 #adds a bunch of rooms
-rooms.append(Rooms(1, [(4, 1), (6, 2), (2, 3)]))
-rooms.append(Rooms(2, [(1, 1), (3, 0)]))
+rooms.append(Rooms(1, [(6, 1), (4, 2), (2, 3)]))
+rooms.append(Rooms(2, [(1, 1), (3, 0), (11, 3)]))
 rooms.append(Rooms(3, [(2, 2)]))
-rooms.append(Rooms(4, [(1, 3), (5, 2)]))
-rooms.append(Rooms(5, [(4, 0), (6, 3)]))
-rooms.append(Rooms(6, [(1, 0), (5, 1)]))
+rooms.append(Rooms(4, [(1, 0), (5, 1)]))
+rooms.append(Rooms(5, [(6, 0), (4, 3)]))
+rooms.append(Rooms(6, [(1, 3), (5, 2), (7,1)]))
+rooms.append(Rooms(7, [(8, 1), (6, 3)]))
+rooms.append(Rooms(8, [(9, 2), (7, 3)]))
+rooms.append(Rooms(9, [(8, 0), (10, 3)]))
+rooms.append(Rooms(10, [(9, 1)]))
+rooms.append(Rooms(11, [(2, 1), (12, 2), (14, 3)]))
+rooms.append(Rooms(12, [(11, 0), (13, 3)]))
+rooms.append(Rooms(13, [(12, 1), (14, 0)]))
+rooms.append(Rooms(14, [(15, 0), (11, 1), (13, 2)]))
+rooms.append(Rooms(15, [(14, 2), (16, 3)]))
+rooms.append(Rooms(16, [(15, 1)]))
 
 #adds a bunch of spawners
 spawners.append(Spawners("apple", 1))
@@ -513,8 +525,21 @@ spawners.append(Spawners("apple", 3, 3))
 spawners.append(Spawners("apple", 4, 2))
 spawners.append(Spawners("apple", 5, 3))
 spawners.append(Spawners("apple", 6, 2))
+spawners.append(Spawners("apple", 7, 1))
+spawners.append(Spawners("apple", 8, 1))
+spawners.append(Spawners("apple", 9, 1))
+spawners.append(Spawners("apple", 10, 5))
+spawners.append(Spawners("apple", 11, 1))
+spawners.append(Spawners("apple", 12, 1))
+spawners.append(Spawners("apple", 13, 2))
+spawners.append(Spawners("apple", 14, 1))
+spawners.append(Spawners("apple", 15, 1))
+spawners.append(Spawners("apple", 16, 5))
 spawners.append(EnemySpawners("enemy", 5, 1, 5, (700, 400)))
 spawners.append(EnemySpawners("enemy", 3, 1, 5, (50, 50)))
+spawners.append(EnemySpawners("enemy", 10, 3, 5, (50, 50)))
+spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
+spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds enemies
 enemies.append(Enemies(0, 200, enemyW, enemyH, 3))
@@ -558,6 +583,26 @@ while running:
             screen.fill((255, 255, 0))
         case 6:
             screen.fill((200, 200, 200))
+        case 7:
+            screen.fill((230, 200, 200))
+        case 8:
+            screen.fill((230, 200, 230))
+        case 9:
+            screen.fill((230, 230, 230))
+        case 10:
+            screen.fill((255, 255, 255))
+        case 11:
+            screen.fill((125, 150, 125))
+        case 12:
+            screen.fill((125, 125, 150))
+        case 13:
+            screen.fill((150, 125, 125))
+        case 14:
+            screen.fill((100, 100, 100))
+        case 15:
+            screen.fill((50, 50, 50))
+        case 16:
+            screen.fill((20, 20, 20))
 
     #event listener
     for event in pygame.event.get():
