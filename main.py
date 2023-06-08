@@ -275,10 +275,13 @@ def check_timeouts():
                 spawner.remove_timeout(timeout)
     for enemy in enemies:
         for timeout in enemy.timeouts:
-            initialSec = timeout[1]
-            cooldown = timeout[2]
-            if sec > initialSec + cooldown:
-                enemy.start_move(timeout)
+            if enemy.inRoom != currentRoom:
+                enemy.timeouts.remove(timeout)
+            else:
+                initialSec = timeout[1]
+                cooldown = timeout[2]
+                if sec > initialSec + cooldown:
+                    enemy.start_move(timeout)
     #for sTime in stockpilesTimeouts:
         #if sec > sTime[0] + 1:
             #spawn_apple_pile(sTime[1])
@@ -364,6 +367,12 @@ class Enemies:
     def reset_pos(self):
         self.x = self.initialX
         self.y = self.initialY
+        self.targetPos = (0, 0)
+        self.move_queued = False
+        self.moving = False
+        self.change_x = 0
+        self.change_y = 0
+        self.dir = (0, 0)
 
     def move(self, delta):
         self.x += self.change_x  * delta
