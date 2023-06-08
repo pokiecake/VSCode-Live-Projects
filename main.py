@@ -255,24 +255,39 @@ def draw_apple(x, y):
 def draw(img, x, y):
     screen.blit(img, (x, y))
 
-#spawns stockpile on cooldown
-def spawn_apple_pile(roomNum = currentRoom):
+#spawns stockpile
+def spawn_apple_pile(room = currentRoom):
     x = random.randint(50, 750)
     y = random.randint(50, 550)
-    s = AppleStockpiles(x, y, appleW, appleH, roomNum)
+    s = AppleStockpiles(x, y, appleW, appleH, room)
     #stockpiles.append(s)
     return s
+
+#spawns enemies
+def spawn_enemy(pos, room):
+    x = pos[0]
+    y = pos[1]
+    e = Enemies(x, y, enemyW, enemyH, room)
+    return e
 
 #temporary timer to automatically create stockpiles after a delay
 def check_timeouts():
     sec = gettime(3)
-    #looks through all the spanwers to find timeouts. Timeouts delay the spawning of stockpiles
+    #looks through all the spawners to find timeouts. Timeouts delay the spawning of stockpiles or enemies
     for spawner in spawners:
         for timeout in spawner.get_timeouts():
-            if sec > timeout[0] + 1:
-                pile = spawn_apple_pile(timeout[1])
-                spawner.add_stockpile(pile)
-                spawner.remove_timeout(timeout)
+            if sec > timeout[0] + timeout[1]:
+                type = spawner.type
+                if type == "apple":
+                    pile = spawn_apple_pile(spawner.room)
+                    spawner.add_item(pile)
+                    spawner.remove_timeout(timeout)
+                elif type == "enemy":
+                    enemy = spawn_enemy(spawner.initial_pos, spawner.room)
+                    spawner.add_item(enemy)
+                    spawner.remove_timeout(timeout)
+                else:
+                    print("type not recognized")
     for enemy in enemies:
         for timeout in enemy.timeouts:
             if enemy.inRoom != currentRoom:
@@ -375,16 +390,17 @@ class Enemies:
         self.dir = (0, 0)
 
     def move(self, delta):
-        self.x += self.change_x  * delta
-        self.y += self.change_y * delta
-        if (self.x * self.dir[0] >= self.targetPos[0] * self.dir[0]):
-            self.change_x = False
-            self.x = self.targetPos[0]
-        if (self.y * self.dir[1] >= self.targetPos[1] * self.dir[1]):
-            self.change_y = False
-            self.y = self.targetPos[1]
-        if (not self.change_x and not self.change_y):
-            self.moving = False
+        if (self.moving == True):
+            self.x += self.change_x  * delta
+            self.y += self.change_y * delta
+            if (self.x * self.dir[0] >= self.targetPos[0] * self.dir[0]):
+                self.change_x = False
+                self.x = self.targetPos[0]
+            if (self.y * self.dir[1] >= self.targetPos[1] * self.dir[1]):
+                self.change_y = False
+                self.y = self.targetPos[1]
+            if (not self.change_x and not self.change_y):
+                self.moving = False
         #print((self.x, self.y))
        # print((self.change_x, self.change_y))
 
@@ -413,35 +429,42 @@ class Enemies:
 
 #Will spawn stockpiles and enemies automatically
 class Spawners:
-    def __init__(self, type, room, max = 1):
+    def __init__(self, type, room, max = 1, cooldown = 1, initial_pos = (0,0)):
         self.type = type
         self.room = room
-        self.stockpiles = []
-        self.stockpileTimeouts = []
-        self.maxStockpiles = max
-        self.queuedStockpiles = 0
-    
-    def check_for_stockpiles(self, sec):
-        if (self.stockpiles.__len__() + self.queuedStockpiles < self.maxStockpiles):
-            self.queuedStockpiles += 1
-            self.stockpileTimeouts.append((sec, self.room))
-    
-    def remove_timeout(self, timeout):
-        self.stockpileTimeouts.remove(timeout)
-        self.queuedStockpiles -= 1
+        self.items = []
+        self.timeouts = []
+        self.cooldown = cooldown
+        self.max = max
+        self.queued = 0
+        self.enabled = True
+        self.initial_pos = initial_pos
+            
+    def check_for_items(self, sec):
+        if (self.items.__len__() + self.queued < self.max):
+            self.queued += 1
+            self.timeouts.append((sec, self.cooldown, type))
 
-    def add_stockpile(self, pile):
-        self.stockpiles.append(pile)
+    def remove_timeout(self, timeout):
+        self.timeouts.remove(timeout)
+        self.queued -= 1
+
+    def add_item(self, pile):
+        self.items.append(pile)
     
-    def remove_stockpile(self, pile):
-        self.stockpiles.remove(pile)
+    def remove_item(self, pile):
+        self.items.remove(pile)
     
     def get_timeouts(self):
-        return self.stockpileTimeouts
+        return self.timeouts
     
-    def get_stockpiles(self):
-        return self.stockpiles
+    def get_items(self):
+        return self.items
 
+class EnemySpawners(Spawners):
+    pass
+    
+    
 
 #class for rooms
 class Rooms:
@@ -490,6 +513,8 @@ spawners.append(Spawners("apple", 3, 3))
 spawners.append(Spawners("apple", 4, 2))
 spawners.append(Spawners("apple", 5, 3))
 spawners.append(Spawners("apple", 6, 2))
+spawners.append(EnemySpawners("enemy", 5, 1, 5, (700, 400)))
+spawners.append(EnemySpawners("enemy", 3, 1, 5, (50, 50)))
 
 #adds enemies
 enemies.append(Enemies(0, 200, enemyW, enemyH, 3))
@@ -675,37 +700,40 @@ while running:
         if x < 0 or x > screenWidth or y < 0 or y > screenHeight:
             bullets.remove(bullet)
             del bullet
-    
-    #checks collision for enemies
-    for enemy in enemies:
-        enemy.move(delta)
-        if enemy.inRoom == currentRoom:
-            draw(enemyImg, enemy.x, enemy.y)
-            enemy.queue_move(currentTime)
-            if (enemy.checkCollision(playerX, playerY, playerW, playerH)):
-                print("collided with enemy")
-            for bullet in bullets:
-                if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
-                    print("bullet hit enemy")
-                    enemies.remove(enemy)
-                    del enemy
-                    break
-        else:
-            enemy.reset_pos()
-
-    #checks for collision for all stockpiles in all spawners
+    #checks for collision for all spawners
     for spawner in spawners:
-        spawner.check_for_stockpiles(currentTime)
-        stockpiles = spawner.get_stockpiles()
-        for pile in stockpiles:
-            pos = pile.getPos()
-            if currentRoom == pile.inRoom:
-                draw_apple(pos[0], pos[1])
-                #removes a pile if collided and adds to the apple bullet count
-                if pile.checkCollision(playerX, playerY, playerW, playerH):
-                    spawner.remove_stockpile(pile)
-                    del pile
-                    appleBulletCount += 1
+        spawner.check_for_items(currentTime)
+        #Checks collisions for all stockpiles
+        if spawner.type == "apple":
+            stockpiles = spawner.get_items()
+            for pile in stockpiles:
+                pos = pile.getPos()
+                if currentRoom == pile.inRoom:
+                    draw_apple(pos[0], pos[1])
+                    #removes a pile if collided and adds to the apple bullet count
+                    if pile.checkCollision(playerX, playerY, playerW, playerH):
+                        spawner.remove_item(pile)
+                        del pile
+                        appleBulletCount += 1
+        #checks collision for enemies
+        elif spawner.type == "enemy":
+            enemies = spawner.get_items()
+            for enemy in enemies:
+                enemy.move(delta)
+                if enemy.inRoom == currentRoom:
+                    draw(enemyImg, enemy.x, enemy.y)
+                    enemy.queue_move(currentTime)
+                    if (enemy.checkCollision(playerX, playerY, playerW, playerH)):
+                        print("collided with enemy")
+                    for bullet in bullets:
+                        if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
+                            print("bullet hit enemy")
+                            enemies.remove(enemy)
+                            del enemy
+                            break
+                else:
+                    enemy.reset_pos()
+
 
     #checks for collisions in entrances.
     for room in rooms:
