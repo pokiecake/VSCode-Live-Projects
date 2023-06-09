@@ -615,6 +615,8 @@ stuckspeed = 0.0 * playerSpeed
 health_bar.hp = 100
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
+HP_DMG = TimeConcept()
+
 running = True
 while running:
     currentTime = gettime(12)
@@ -808,6 +810,7 @@ while running:
             bullets.remove(bullet)
             del bullet
     #checks for collision for all spawners
+    
     for spawner in spawners:
         spawner.check_for_items(currentTime)
         #Checks collisions for all stockpiles
@@ -830,10 +833,17 @@ while running:
                 if enemy.inRoom == currentRoom:
                     draw(enemyImg, enemy.x, enemy.y)
                     enemy.queue_move(currentTime)
-                    if (enemy.checkCollision(playerX, playerY, playerW, playerH)):
-                        
+                    
+                    if (enemy.checkCollision(playerX, playerY, playerW, playerH)): 
                         print("collided with enemy")
-                        health_bar.hp = health_bar.hp - 10
+                        if HP_DMG.cooldown(3) == True:
+                            health_bar.hp = health_bar.hp - 10
+                        
+                            
+                        
+                        
+                            
+                    
                         
                     for bullet in bullets:
                         if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
