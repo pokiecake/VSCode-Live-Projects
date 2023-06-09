@@ -1322,7 +1322,6 @@ spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds enemies
 enemies.append(Enemies(0, 200, enemyW, enemyH, 3))
-bosses.append()
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
