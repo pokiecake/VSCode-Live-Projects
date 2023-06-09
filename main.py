@@ -1190,6 +1190,32 @@ rooms.append(Rooms(6, [(1, 3), (5, 2), (7,1)]))
 rooms.append(Rooms(7, [(8, 1), (6, 3)]))
 rooms.append(Rooms(8, [(9, 2), (7, 3)]))
 rooms.append(Rooms(9, [(8, 0), (10, 3)]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 rooms.append(Rooms(10, [(9, 1)]))
 rooms.append(Rooms(11, [(2, 1), (12, 2), (14, 3)]))
 rooms.append(Rooms(12, [(11, 0), (13, 3)]))
@@ -1258,6 +1284,38 @@ spawners.append(Spawners("apple", 15, 1))
 spawners.append(Spawners("apple", 16, 5))
 spawners.append(EnemySpawners("enemy", 5, 1, 5, (700, 400)))
 spawners.append(EnemySpawners("enemy", 3, 1, 5, (50, 50)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 spawners.append(EnemySpawners("enemy", 10, 3, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
@@ -1717,6 +1775,73 @@ while running:
     playerX_change = playerSpeed * calcsign(playerX_change) + calcspeed(playerX_change)
     playerY_change = playerSpeed * calcsign(playerY_change) + calcspeed(playerY_change)
     #changes the player's position
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     playerX += playerX_change * delta
     playerY += playerY_change * delta
 
@@ -1837,6 +1962,36 @@ while running:
                         if HP_DMG.cooldown(2) == True:
                             health_bar.hp = health_bar.hp - 10
                     for bullet in bullets:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
                             print("bullet hit enemy")
                             enemies.remove(enemy)
@@ -1910,5 +2065,51 @@ while running:
     check_timeouts()
 
     lastTime = currentTime
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     pygame.display.update()
