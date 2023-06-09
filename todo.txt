@@ -14,7 +14,7 @@ Weapons:
 -Maybe a sword?
 
 Lives/Health:
--just a health bar or lives counter
+-just a health bar or lives counter (done for now)
 
 Goal:
 -Kill enemies, don't die
