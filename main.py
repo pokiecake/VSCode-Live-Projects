@@ -37,7 +37,7 @@ class HealthBar():
         pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
         pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
 
-health_bar = HealthBar(250, 200, 100, 40, 100)
+health_bar = HealthBar(250, 50, 400, 40, 100)
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
 playerImg = pygame.transform.scale(playerImg,(125,196))
@@ -597,8 +597,7 @@ while running:
     #screen.blit(background, (0,0))
 
     #draws healthbar
-    health_bar.hp = 100
-    health_bar.draw(screen)
+    
 
     match(currentRoom):
         case 1:
@@ -748,6 +747,8 @@ while running:
                 uphold = False
                 playerY_change = 0
 
+    
+
     #x and y change accounting for temporary speed
     playerX_change = playerSpeed * calcsign(playerX_change) + calcspeed(playerX_change)
     playerY_change = playerSpeed * calcsign(playerY_change) + calcspeed(playerY_change)
@@ -830,6 +831,10 @@ while running:
     if (inEntrance != -1):
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
+    
+    #drawing hp bar
+    health_bar.hp = 100
+    health_bar.draw(screen)
     
     #checks the spawners to see if a stockpile should be created
     check_timeouts()
