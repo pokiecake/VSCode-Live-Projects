@@ -3,6 +3,7 @@ from pygame import mixer
 import random
 import time
 import asyncio
+import math
 
 
 # Intialize the pygame
@@ -37,17 +38,26 @@ appleW = appleImg.get_width()
 appleH = appleImg.get_height()
 
 #Apple Bullets
-apple_state = "ready"
+bullet_state = "ready"
+rapid_fire = False
 bullets = []
-appleBulletX = 0
-appleBulletY = 0
-apple_changeX = 0
-apple_changeY = 0
 appleBulletCount = 0
 
 #Apple Stockpiles
-stockpiles = []
-stockpilesTimeouts = []
+#stockpiles = []
+#stockpilesTimeouts = []
+
+#Enemies
+enemyImg = pygame.image.load("Sprites/fob.png")
+enemyImg = pygame.transform.scale(enemyImg, (125,196))
+enemyW = enemyImg.get_width()
+enemyH = enemyImg.get_height()
+enemies = []
+
+#Bosses
+boss_img = pygame.image.load("Sprites/Boss.png")
+boss_w = boss_img.get_width()
+boss_h = boss_img.get_height()
 
 #Apple spawners
 spawners = []
@@ -56,7 +66,7 @@ spawners = []
 rooms = []
 entranceW = 100
 entranceH = 200
-enteringRoom = -1
+inEntrance = -1
 
 #Text
 ammofont = pygame.font.Font('freesansbold.ttf',32)
@@ -64,12 +74,18 @@ ammox = 0
 ammoy = 0
 enterPopupX = 0
 enterPopupY = 50
+roomX = 650
+roomY = 0
 def showammo(x,y):
     ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
     screen.blit(ammocount, (x,y))
 
 def showEnterPopup(x, y):
-    popup = ammofont.render("Enter Room {0}?".format(enteringRoom), True, (0, 0, 255))
+    popup = ammofont.render("Enter Room {0}?".format(inEntrance[0]), True, (0, 0, 255))
+    screen.blit(popup, (x,y))
+
+def showRoom(x, y):
+    popup = ammofont.render("Room: {0}".format(currentRoom), True, (255, 0, 0))
     screen.blit(popup, (x,y))
 
 #gets the time when the program started
@@ -87,19 +103,76 @@ def gettime(roundnum):
 #time class will now be used to add more functions related to time
 class TimeConcept:
     def __init__(self):
-        1 == 1
+        pass
     
 
-
     #the following gets the time elapsed since last call
-    global oldtime
-    oldtime = 0
+    #oldtime1 is oldtime for cooldowns, oldtime2 is oldtime for time windows
+    global oldtime1
+    global oldtime2
+    oldtime2 = 0
+    oldtime1 = 0
     def timeelapsed(self):
-        global oldtime
+        global oldtime1
         newtime = gettime(99)
-        elapsed = newtime - oldtime
-        oldtime = newtime
+        elapsed = newtime - oldtime1
         return elapsed
+    
+    def cooldown(self, amount):
+        global oldtime1
+        
+        timepassed = self.timeelapsed()
+        if timepassed >= amount:
+            oldtime1 = gettime(99)
+            return True
+        else:
+            return False
+
+    def timewindow(self, amount):
+        global oldtime2
+        
+        timepassed = gettime(99) - oldtime2
+        if timepassed >= amount:
+            oldtime2 = gettime(99)
+            return False
+        else:
+            oldtime2 = gettime(99)
+            return True
+
+#temporary speed function; makes the temporary speed decay over time
+tempspeed = 0
+collectivetime = 0
+def calcspeed(change):
+    global tempspeed
+    global delta
+    global collectivetime
+    collectivetime = collectivetime + delta
+    if tempspeed > 0 and change != 0 and collectivetime != 0:
+        if tempspeed < 1:
+            tempspeed = 0
+        retvalue = tempspeed
+        tempspeed = (tempspeed * (0.5/collectivetime))
+        if tempspeed > playerSpeed * 2:
+            tempspeed = playerSpeed * 2
+        if change > 0:
+            return retvalue
+        elif change < 0:
+            return -retvalue
+        
+    elif tempspeed == 0:
+        collectivetime = 0
+        return 0
+    else:
+        return 0
+
+#calculates whether the current value is positive or negative and returns 1 or -1 respectively
+def calcsign(num):
+    if num > 0:
+        return 1
+    elif num < 0:
+        return -1
+    else:
+        return 0
 
 #displays text for the time
 timefont = pygame.font.Font('freesansbold.ttf',32)
@@ -118,8 +191,6 @@ BGImage = pygame.image.load("Assets/spongebob.png")
 
 BGImage = pygame.transform.scale(BGImage,(screenWidth, screenHeight))
 
-# camera setup
-
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
@@ -127,65 +198,131 @@ def apple(x, y):
     screen.blit(appleImg, (x, y))
 
 #doesn't actually fire apples, only creates them and their positions
-def fire_apple(x, y):
+def fire_apple(x, y, mousePos = False):
     global apple_state
-    global appleBulletX
-    global appleBulletY
-    global apple_changeX
-    global apple_changeY
+    apple_changeX = 0
+    apple_changeY = 0
     global bullets
     bulletSpeed = 2000
     apple_state = "fire"
     xPos = x
     yPos = y
-    #0 is up, 1 is right, 2 is down, 3 is left
-    match(playerDirection):
-        case 0:
-            yPos -= appleH
-            xPos += (playerW - appleW) / 2
-            apple_changeX = 0
-            apple_changeY = -bulletSpeed
-        case 1:
-            yPos += (playerH - appleH) / 2
-            xPos += playerW + appleW
-            apple_changeX = bulletSpeed
-            apple_changeY = 0
-        case 2:
-            yPos += playerH + appleH
-            xPos += (playerW - appleW) / 2
-            apple_changeX = 0
-            apple_changeY = bulletSpeed
-        case 3:
-            yPos += (playerH - appleH) / 2
-            xPos -= appleW
-            apple_changeX = -bulletSpeed
-            apple_changeY = 0
+    if mousePos == False:
+        #0 is up, 1 is right, 2 is down, 3 is left
+        match(playerDirection):
+            case 0:
+                yPos -= appleH
+                xPos += (playerW - appleW) / 2
+                apple_changeX = 0
+                apple_changeY = -bulletSpeed
+            case 1:
+                yPos += (playerH - appleH) / 2
+                xPos += playerW + appleW
+                apple_changeX = bulletSpeed
+                apple_changeY = 0
+            case 2:
+                yPos += playerH + appleH
+                xPos += (playerW - appleW) / 2
+                apple_changeX = 0
+                apple_changeY = bulletSpeed
+            case 3:
+                yPos += (playerH - appleH) / 2
+                xPos -= appleW
+                apple_changeX = -bulletSpeed
+                apple_changeY = 0
+    else:
+        #Finds the angle between the mouse and the center of the player
+        #then it fires the apple in the direction found by the angle
+        centerX = playerX + playerW / 2
+        centerY = playerY + playerH / 2
+        xPos = centerX - appleW / 2
+        yPos = centerY - appleH / 2
+        deltaX = mousePos[0] - centerX
+        deltaY = mousePos[1] - centerY
+        dirX = 1 if deltaX > 0 else -1
+        dirY = 1 if deltaY > 0 else -1
+        angle = abs(math.atan((deltaY) / (deltaX)))
+        apple_changeX = math.cos(angle) * bulletSpeed * dirX
+        apple_changeY = math.sin(angle) * bulletSpeed * dirY
     #sets the apple bullet's position based on the direction
-    appleBulletX = xPos
-    appleBulletY = yPos
-    bullet = AppleBullets(xPos, yPos, apple_changeX, apple_changeY)
+    bullet = AppleBullets(xPos, yPos, appleW, appleH, apple_changeX, apple_changeY)
     bullets.append(bullet)
 
 #draws anything apple related
 def draw_apple(x, y):
     screen.blit(appleImg, (x, y))
 
-#spawns stockpile on cooldown
-def spawn_apple_pile(roomNum = currentRoom):
+#draws anything
+def draw(img, x, y):
+    screen.blit(img, (x, y))
+
+#spawns stockpile
+def spawn_apple_pile(room = currentRoom):
     x = random.randint(50, 750)
     y = random.randint(50, 550)
-    s = AppleStockpiles(x, y, appleW, appleH, roomNum)
-    stockpiles.append(s)
-    draw_apple(x, y)
+    s = AppleStockpiles(x, y, appleW, appleH, room)
+    #stockpiles.append(s)
     return s
+
+#spawns enemies
+def spawn_enemy(pos, room):
+    x = pos[0]
+    y = pos[1]
+    e = Enemies(x, y, enemyW, enemyH, room)
+    return e
+
+def spawn_boss(pos, room):
+    x = pos[0]
+    y = pos[1]
+    b = Boss(x, y, bossW, bossH, room)
+    return b 
 
 #temporary timer to automatically create stockpiles after a delay
 def check_timeouts():
-    sec = time.time()
-    for sTime in stockpilesTimeouts:
-        if sec > sTime[0] + 1:
-            spawn_apple_pile(sTime[1])
-            stockpilesTimeouts.remove(sTime)
+    sec = gettime(3)
+    #looks through all the spawners to find timeouts. Timeouts delay the spawning of stockpiles or enemies
+    for spawner in spawners:
+        for timeout in spawner.get_timeouts():
+            if sec > timeout[0] + timeout[1]:
+                type = spawner.type
+                if type == "apple":
+                    pile = spawn_apple_pile(spawner.room)
+                    spawner.add_item(pile)
+                    spawner.remove_timeout(timeout)
+                elif type == "enemy":
+                    enemy = spawn_enemy(spawner.initial_pos, spawner.room)
+                    spawner.add_item(enemy)
+                    spawner.remove_timeout(timeout)
+                elif type == "boss":
+                    boss = spawn_boss(spawner.initial_pos, spawner.room)
+                    spawner.add_item(boss)
+                    spawner.remove_timeout(timeout)
+                else:
+                    print("type not recognized")
+        if spawner.type == "enemy":
+            enemies = spawner.get_items()
+            for enemy in enemies:
+                for timeout in enemy.timeouts:
+                    if enemy.inRoom != currentRoom:
+                        enemy.timeouts.remove(timeout)
+                    else:
+                        initialSec = timeout[1]
+                        cooldown = timeout[2]
+                        if sec > initialSec + cooldown:
+                            enemy.start_move(timeout)
+        if spawner.type == "boss":
+            bosses = spawner.get_items()
+            for boss in bosses:
+                for timeout in boss.timeouts:
+                    if boss.inRoom == currentRoom:
+                        initial_sec = timeout[1]
+                        cooldown = timeout[2]
+                        if sec > initial_sec + cooldown:
+                            boss.start_move(timeout)
+    #for sTime in stockpilesTimeouts:
+        #if sec > sTime[0] + 1:
+            #spawn_apple_pile(sTime[1])
+            #stockpilesTimeouts.remove(sTime)
 
 #checks collision between target 1 and 2. Trust me on the math
 def check_collisions(target1P, target2P):
@@ -200,11 +337,21 @@ def check_collisions(target1P, target2P):
 
     return (y2 < y1 + h1 and y2 + h2 > y1) and ((x2 < x1 + w1 and x2 + w2 > x1) or (x2 + w2 > x1 and x2 < x1 + w1))
 
+def find_angle(pos1, pos2):
+    deltaX = pos2[0] - pos1[0]
+    deltaY = pos2[1] - pos1[1]
+    dirX = 1 if deltaX > 0 else -1
+    dirY = 1 if deltaY > 0 else -1
+    angle = abs(math.atan((deltaY) / (deltaX)))
+    return (angle, dirX, dirY)
+
 #class for apple bullets
 class AppleBullets:
-    def __init__(self, x, y, change_x, change_y):
+    def __init__(self, x, y, w, h, change_x, change_y):
         self.x = x
         self.y = y
+        self.w = w
+        self.h = h
         self.change_x = change_x
         self.change_y = change_y
     
@@ -235,20 +382,131 @@ class AppleStockpiles:
     def getPos(self):
         return (self.x, self.y)
 
-#Will spawn stockpiles automatically
+#Class for enemies
+class Enemies:
+    def __init__(self, x, y, w, h, inRoom):
+        self.initialX = x
+        self.initialY = y
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.targetPos = (0, 0)
+        self.dir = (0, 0)
+        self.inRoom = inRoom
+        self.change_x = 0
+        self.change_y = 0
+        self.timeouts = []
+        self.move_queued = False
+        self.moving = False
+        self.speed = 400
+    
+    def reset_pos(self):
+        self.x = self.initialX
+        self.y = self.initialY
+        self.targetPos = (0, 0)
+        self.move_queued = False
+        self.moving = False
+        self.change_x = 0
+        self.change_y = 0
+        self.dir = (0, 0)
+
+    def move(self, delta):
+        if (self.moving == True):
+            self.x += self.change_x  * delta
+            self.y += self.change_y * delta
+            if (self.x * self.dir[0] >= self.targetPos[0] * self.dir[0]):
+                self.change_x = False
+                self.x = self.targetPos[0]
+            if (self.y * self.dir[1] >= self.targetPos[1] * self.dir[1]):
+                self.change_y = False
+                self.y = self.targetPos[1]
+            if (not self.change_x and not self.change_y):
+                self.moving = False
+        #print((self.x, self.y))
+       # print((self.change_x, self.change_y))
+
+    def queue_move(self, sec):
+        if (not self.moving and not self.move_queued):
+            self.move_queued = True
+            random_pos = (random.randint(0, screenWidth - self.w), random.randint(0, screenHeight - self.h))
+            self.timeouts.append(((random_pos), sec, 3))
+            print("move queued")
+    
+    def start_move(self, timeout):
+        self.move_queued = False
+        self.moving = True
+        self.targetPos = timeout[0]
+        angle_and_dir = find_angle((self.x, self.y), self.targetPos)
+        angle = angle_and_dir[0]
+        dirX = angle_and_dir[1]
+        dirY = angle_and_dir[2]
+        self.dir = (dirX, dirY)
+        self.change_x = math.cos(angle) * self.speed * dirX
+        self.change_y = math.sin(angle) * self.speed * dirY
+        self.timeouts.remove(timeout)
+
+    def checkCollision(self, pX, pY, pW, pH):
+        return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
+
+#Will spawn stockpiles and enemies automatically
 class Spawners:
-    def __init__(self, type, room):
+    def __init__(self, type, room, max = 1, cooldown = 1, initial_pos = (0,0)):
         self.type = type
         self.room = room
-        self.stockpiles = []
-        self.maxStockpiles = 1
-        self.queuedStockpiles = 0
-    
-    def check_for_stockpiles(self):
-        if (self.stockpiles.__len__() < self.maxStockpiles):
-            self.queuedStockpiles += 1
-            self.stockpiles.append(spawn_apple_pile())
+        self.items = []
+        self.timeouts = []
+        self.cooldown = cooldown
+        self.max = max
+        self.queued = 0
+        self.enabled = True
+        self.initial_pos = initial_pos
+            
+    def check_for_items(self, sec):
+        if (self.items.__len__() + self.queued < self.max):
+            self.queued += 1
+            self.timeouts.append((sec, self.cooldown, type))
 
+    def remove_timeout(self, timeout):
+        self.timeouts.remove(timeout)
+        self.queued -= 1
+
+    def add_item(self, pile):
+        self.items.append(pile)
+    
+    def remove_item(self, pile):
+        self.items.remove(pile)
+    
+    def get_timeouts(self):
+        return self.timeouts
+    
+    def get_items(self):
+        return self.items
+
+class EnemySpawners(Spawners):
+    pass
+
+class Boss(Spawners):
+    pass
+
+#class of healthbar
+
+class HealthBar():
+    def __init__(self, x, y, w, h, max_hp):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.hp = max_hp
+        self.max_hp = max_hp
+
+    def draw(self, surface):
+    #calculate health ratio  
+        ratio = self.hp / self.max_hp
+        pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
+        pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
+
+health_bar = HealthBar(250, 50, 400, 40, 100)
 
 #class for rooms
 class Rooms:
@@ -279,15 +537,52 @@ class Rooms:
         return False  
 
 #spawns an apple pile in room 1 and room 2
-spawn_apple_pile(1)
-spawn_apple_pile(2)
+#spawn_apple_pile(1)
+#spawn_apple_pile(2)
 
-rooms.append(Rooms(1, [(4, 1), (6, 2), (2, 3)]))
-rooms.append(Rooms(2, [(1, 1), (3, 0)]))
+#adds a bunch of rooms
+rooms.append(Rooms(1, [(6, 1), (4, 2), (2, 3)]))
+rooms.append(Rooms(2, [(1, 1), (3, 0), (11, 3)]))
 rooms.append(Rooms(3, [(2, 2)]))
-rooms.append(Rooms(4, [(1, 3), (5, 2)]))
-rooms.append(Rooms(5, [(4, 0), (6, 3)]))
-rooms.append(Rooms(6, [(1, 0), (5, 1)]))
+rooms.append(Rooms(4, [(1, 0), (5, 1)]))
+rooms.append(Rooms(5, [(6, 0), (4, 3)]))
+rooms.append(Rooms(6, [(1, 3), (5, 2), (7,1)]))
+rooms.append(Rooms(7, [(8, 1), (6, 3)]))
+rooms.append(Rooms(8, [(9, 2), (7, 3)]))
+rooms.append(Rooms(9, [(8, 0), (10, 3)]))
+rooms.append(Rooms(10, [(9, 1)]))
+rooms.append(Rooms(11, [(2, 1), (12, 2), (14, 3)]))
+rooms.append(Rooms(12, [(11, 0), (13, 3)]))
+rooms.append(Rooms(13, [(12, 1), (14, 0)]))
+rooms.append(Rooms(14, [(15, 0), (11, 1), (13, 2)]))
+rooms.append(Rooms(15, [(14, 2), (16, 3)]))
+rooms.append(Rooms(16, [(15, 1)]))
+
+#adds a bunch of spawners
+spawners.append(Spawners("apple", 1))
+spawners.append(Spawners("apple", 2, 2))
+spawners.append(Spawners("apple", 3, 3))
+spawners.append(Spawners("apple", 4, 2))
+spawners.append(Spawners("apple", 5, 3))
+spawners.append(Spawners("apple", 6, 2))
+spawners.append(Spawners("apple", 7, 1))
+spawners.append(Spawners("apple", 8, 1))
+spawners.append(Spawners("apple", 9, 1))
+spawners.append(Spawners("apple", 10, 5))
+spawners.append(Spawners("apple", 11, 1))
+spawners.append(Spawners("apple", 12, 1))
+spawners.append(Spawners("apple", 13, 2))
+spawners.append(Spawners("apple", 14, 1))
+spawners.append(Spawners("apple", 15, 1))
+spawners.append(Spawners("apple", 16, 5))
+spawners.append(EnemySpawners("enemy", 5, 1, 5, (700, 400)))
+spawners.append(EnemySpawners("enemy", 3, 1, 5, (50, 50)))
+spawners.append(EnemySpawners("enemy", 10, 3, 5, (50, 50)))
+spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
+spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
+
+#adds enemies
+enemies.append(Enemies(0, 200, enemyW, enemyH, 3))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -300,22 +595,26 @@ lefthold = False
 righthold = False
 uphold = False
 downhold = False
+lastkey = ""
 #Controls speed when both opposite buttons pressed
 stuckspeed = 0.0 * playerSpeed
 
-#Game Loop. When the x button is clicked, running is set to false and the window closes.
+#sets healthbar
+health_bar.hp = 100
+HP_DMG = TimeConcept()
+
 running = True
+#Game Loop. When the x button is clicked, running is set to false and the window closes.
 while running:
     currentTime = gettime(12)
     delta = currentTime - lastTime
-    #creates a new stockpile if one hasn't been created
-    check_timeouts()
     #Draws Purplish background. Unneeded due to spongebob background
     #screen.fill((150,0,150))
 
     #draws spongebob background
     #pygame.transform.scale_by(BGImage,20)
     #screen.blit(background, (0,0))
+
     match(currentRoom):
         case 1:
             screen.blit(BGImage, (0,0))
@@ -329,12 +628,42 @@ while running:
             screen.fill((255, 255, 0))
         case 6:
             screen.fill((200, 200, 200))
+        case 7:
+            screen.fill((230, 200, 200))
+        case 8:
+            screen.fill((230, 200, 230))
+        case 9:
+            screen.fill((230, 230, 230))
+        case 10:
+            screen.fill((255, 255, 255))
+        case 11:
+            screen.fill((125, 150, 125))
+        case 12:
+            screen.fill((125, 125, 150))
+        case 13:
+            screen.fill((150, 125, 125))
+        case 14:
+            screen.fill((100, 100, 100))
+        case 15:
+            screen.fill((50, 50, 50))
+        case 16:
+            screen.fill((20, 20, 20))
 
     #event listener
     for event in pygame.event.get():
         #stops the game when the x button is pressed
         if event.type == pygame.QUIT:
             running = False
+        #shoots an apple in the direction of the cursor
+        if pygame.mouse.get_pressed()[0] and appleBulletCount > 0 and (bullet_state == "ready" or rapid_fire):
+                fire_apple(playerX, playerY, pygame.mouse.get_pos())
+                appleBulletCount -= 1
+                #ensures that the apple won't be released when the mouse is held down
+                #if you want to shoot while holding the mouse down, set the rapid_fire variable to true
+                bullet_state = "fired"
+        #Reloads the gun when the left mouse button is released
+        elif not pygame.mouse.get_pressed()[0]:
+            bullet_state = "ready"
         #handles key presses
         if event.type == pygame.KEYDOWN:
             #sets the x and y changes based on what is pressed
@@ -366,6 +695,16 @@ while running:
                 playerY_change = -stuckspeed
                 downhold = True
             
+            #testing key presses here
+            dash = TimeConcept()
+            if dash.timewindow(0.5) and lastkey == event.key:
+                tempspeed = playerSpeed
+
+            else:
+                pass
+
+            lastkey = event.key
+
             #changes the direction of the player's shooting
             if event.key == pygame.K_w:
                 playerDirection = 0
@@ -381,8 +720,18 @@ while running:
                     appleBulletCount -= 1
             
             #changes the room when at an entrance. (not for testing purposes)
-            if event.key == pygame.K_r and enteringRoom != -1:
-                currentRoom = enteringRoom
+            if event.key == pygame.K_e and inEntrance != -1:
+                currentRoom = inEntrance[0]
+                dir = inEntrance[1]
+                match(dir):
+                    case 0:
+                        playerY = screenHeight - playerH
+                    case 1:
+                        playerX = 0
+                    case 2:
+                        playerY = 0
+                    case 3:
+                        playerX = screenWidth - playerW
         #handles key lifts
         if event.type == pygame.KEYUP:
             #stops changes after corresponding keys are lifted given that no other key is held
@@ -414,6 +763,13 @@ while running:
                 uphold = False
                 playerY_change = 0
 
+    #drawing hp bar
+    
+    health_bar.draw(screen)
+
+    #x and y change accounting for temporary speed
+    playerX_change = playerSpeed * calcsign(playerX_change) + calcspeed(playerX_change)
+    playerY_change = playerSpeed * calcsign(playerY_change) + calcspeed(playerY_change)
     #changes the player's position
     playerX += playerX_change * delta
     playerY += playerY_change * delta
@@ -438,18 +794,44 @@ while running:
         if x < 0 or x > screenWidth or y < 0 or y > screenHeight:
             bullets.remove(bullet)
             del bullet
+    #checks for collision for all spawners
+    
+    for spawner in spawners:
+        spawner.check_for_items(currentTime)
+        #Checks collisions for all stockpiles
+        if spawner.type == "apple":
+            stockpiles = spawner.get_items()
+            for pile in stockpiles:
+                pos = pile.getPos()
+                if currentRoom == pile.inRoom:
+                    draw_apple(pos[0], pos[1])
+                    #removes a pile if collided and adds to the apple bullet count
+                    if pile.checkCollision(playerX, playerY, playerW, playerH):
+                        spawner.remove_item(pile)
+                        del pile
+                        appleBulletCount += 1
+        #checks collision for enemies    
+        elif spawner.type == "enemy":
+            enemies = spawner.get_items()
+            for enemy in enemies:
+                enemy.move(delta)
+                if enemy.inRoom == currentRoom:
+                    draw(enemyImg, enemy.x, enemy.y)
+                    enemy.queue_move(currentTime)
+                    
+                    if (enemy.checkCollision(playerX, playerY, playerW, playerH)): 
+                        print("collided with enemy")
+                        if HP_DMG.cooldown(2) == True:
+                            health_bar.hp = health_bar.hp - 10
+                    for bullet in bullets:
+                        if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
+                            print("bullet hit enemy")
+                            enemies.remove(enemy)
+                            del enemy
+                            break
+                else:
+                    enemy.reset_pos()
 
-    #checks for collision for all stockpiles
-    for pile in stockpiles:
-        pos = pile.getPos()
-        if currentRoom == pile.inRoom:
-            draw_apple(pos[0], pos[1])
-            #removes a pile if collided and adds to the apple bullet count
-            if pile.checkCollision(playerX, playerY, playerW, playerH):
-                stockpilesTimeouts.append((time.time(), pile.inRoom))
-                stockpiles.remove(pile)
-                del pile
-                appleBulletCount += 1
 
     #checks for collisions in entrances.
     for room in rooms:
@@ -457,9 +839,9 @@ while running:
             entrance = room.checkCollisions(playerX, playerY, playerW, playerH)
             if entrance != False:
                 #if r is pressed, the player will enter the room
-                enteringRoom = entrance[0]
+                inEntrance = entrance
             else:
-                enteringRoom = -1
+                inEntrance = -1
 
     #draws the players and apples
     player(playerX, playerY)
@@ -467,9 +849,14 @@ while running:
     #draws text & other assets
     showammo(ammox,ammoy)
     showtime(timex,timey)
-    if (enteringRoom != -1):
+    showRoom(roomX, roomY)
+    if (inEntrance != -1):
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
+    
+    #checks the spawners to see if a stockpile should be created
+    check_timeouts()
+
     lastTime = currentTime
 
     pygame.display.update()
