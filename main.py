@@ -822,6 +822,8 @@ while running:
                             enemies.remove(enemy)
                             del enemy
                             enemies_killed += 1
+                            bullets.remove(bullet)
+                            del bullet
                             break
                 else:
                     enemy.reset_pos()
