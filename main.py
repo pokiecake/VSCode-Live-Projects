@@ -915,6 +915,7 @@ while running:
                     m = boss.hit()
                     if (m == "killed"):
                         bosses.remove(boss)
+                        enemies_killed += 1
                     bullets.remove(bullet)
                     break
         else:
