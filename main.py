@@ -466,14 +466,17 @@ class Bosses(Enemies):
         self.speed = 700
         self.health = 5
         self.vulnerable = False
-        self.timeout_v = TimeConcept()
+        self.timeout_v = 0
         self.cooldown = random.randint(5, 10)
 
     #switches the vulnerability of the boss after a cooldown
     def toggle_vulnerability(self):
+        #Ensures that the cooldown only starts once the room has been entered
+        if (self.timeout_v == 0):
+            self.timeout_v = TimeConcept()
         if (self.timeout_v.cooldown(self.cooldown)):
             self.vulnerable = not self.vulnerable
-            self.cooldown = random.randint(5, 10)
+            self.cooldown = random.randint(5, 8)
             if self.vulnerable:
                 self.cooldown = 3
 
@@ -485,6 +488,11 @@ class Bosses(Enemies):
             return "killed"
         else:
             return self.health
+    
+    def reset(self):
+        self.reset_pos()
+        self.timeout_v = 0
+        self.cooldown = random.randint(5, 10)
 
 #Will spawn stockpiles and enemies automatically
 class Spawners:
@@ -904,7 +912,7 @@ while running:
                     break
         else:
             #resets the boss position when not in the same room
-            boss.reset_pos()
+            boss.reset()
 
     #checks for collisions in entrances.
     for room in rooms:
