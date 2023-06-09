@@ -19,8 +19,6 @@ pygame.display.set_caption("Buffet Wars")
 icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
 
-
-
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
 playerImg = pygame.transform.scale(playerImg,(125,196))
@@ -58,8 +56,6 @@ enemies = []
 
 #Apple spawners
 spawners = []
-
-
 
 #rooms
 rooms = []
@@ -104,7 +100,6 @@ class TimeConcept:
     def __init__(self):
         1 == 1
     
-
 
     #the following gets the time elapsed since last call
     #oldtime1 is oldtime for cooldowns, oldtime2 is oldtime for time windows
@@ -174,7 +169,6 @@ def calcsign(num):
     else:
         return 0
 
-
 #displays text for the time
 timefont = pygame.font.Font('freesansbold.ttf',32)
 timex = 0
@@ -185,16 +179,12 @@ def showtime(x,y):
     timecount = timefont.render("Time elapsed: " + str(gettime(3)), True, (0,0,255))
     screen.blit(timecount, (x,y))
 
-
-
 #Background
 background = pygame.Surface((screenWidth, screenHeight))
 
 BGImage = pygame.image.load("Assets/spongebob.png")
 
 BGImage = pygame.transform.scale(BGImage,(screenWidth, screenHeight))
-
-
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -330,10 +320,6 @@ def find_angle(pos1, pos2):
     dirY = 1 if deltaY > 0 else -1
     angle = abs(math.atan((deltaY) / (deltaX)))
     return (angle, dirX, dirY)
-
-
-
-
 
 #class for apple bullets
 class AppleBullets:
@@ -603,8 +589,6 @@ while running:
     #pygame.transform.scale_by(BGImage,20)
     #screen.blit(background, (0,0))
 
-    
-
     match(currentRoom):
         case 1:
             screen.blit(BGImage, (0,0))
@@ -811,15 +795,8 @@ while running:
                     
                     if (enemy.checkCollision(playerX, playerY, playerW, playerH)): 
                         print("collided with enemy")
-                        if HP_DMG.cooldown(3) == True:
+                        if HP_DMG.cooldown(2) == True:
                             health_bar.hp = health_bar.hp - 10
-                        
-                            
-                        
-                        
-                            
-                    
-                        
                     for bullet in bullets:
                         if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
                             print("bullet hit enemy")
