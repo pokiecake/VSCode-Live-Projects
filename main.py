@@ -56,6 +56,7 @@ enemies = []
 
 #Bosses
 boss_img = pygame.image.load("Sprites/Boss.png")
+boss_img = pygame.transform.scale(boss_img, (125, 196))
 boss_w = boss_img.get_width()
 boss_h = boss_img.get_height()
 bosses = []
@@ -275,11 +276,12 @@ def spawn_enemy(pos, room):
 def spawn_boss(pos, room):
     x = pos[0]
     y = pos[1]
-    b = Boss(x, y, bossW, bossH, room)
+    b = Bosses(x, y, boss_w, boss_h, room)
     return b 
 
 #temporary timer to automatically create stockpiles after a delay
 def check_timeouts():
+    global bosses
     sec = gettime(3)
     #looks through all the spawners to find timeouts. Timeouts delay the spawning of stockpiles or enemies
     for spawner in spawners:
@@ -320,6 +322,13 @@ def check_timeouts():
                         cooldown = timeout[2]
                         if sec > initial_sec + cooldown:
                             boss.start_move(timeout)
+    for boss in bosses:
+        for timeout in boss.timeouts:
+            if boss.inRoom == currentRoom:
+                initial_sec = timeout[1]
+                cooldown = timeout[2]
+                if sec > initial_sec + cooldown:
+                    boss.start_move(timeout)
     #for sTime in stockpilesTimeouts:
         #if sec > sTime[0] + 1:
             #spawn_apple_pile(sTime[1])
@@ -452,7 +461,28 @@ class Enemies:
 
 #Boss class
 class Bosses(Enemies):
-    pass
+    #some values needed for the boss
+    def set_boss_values(self):
+        self.speed = 700
+        self.health = 5
+        self.vulnerable = False
+        self.timeout_v = TimeConcept()
+        self.cooldown = random.randint(5, 10)
+
+    #switches the vulnerability of the boss after a cooldown
+    def toggle_vulnerability(self):
+        if (self.timeout_v.cooldown(self.cooldown)):
+            self.vulnerable = not self.vulnerable
+            self.cooldown = random.randint(5, 10)
+
+    #handles a bullet hitting the boss.
+    def hit(self):
+        if self.vulnerable == True:
+            self.health -= 1
+        if (self.health == 0):
+            return "killed"
+        else:
+            return self.health
 
 #Will spawn stockpiles and enemies automatically
 class Spawners:
@@ -588,7 +618,7 @@ spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds bosses
-bosses.append(Bosses(350, 300, boss_w, boss_h, 17))
+bosses.append(Bosses(275, 200, boss_w, boss_h, 17))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -608,6 +638,10 @@ stuckspeed = 0.0 * playerSpeed
 #sets healthbar
 health_bar.hp = 100
 HP_DMG = TimeConcept()
+
+#Loops through the bosses to set some values specific to the bosses
+for boss in bosses:
+    boss.set_boss_values()
 
 running = True
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
@@ -653,7 +687,9 @@ while running:
         case 15:
             screen.fill((50, 50, 50))
         case 16:
-            screen.fill((20, 20, 20))
+            screen.fill((30, 30, 30))
+        case 17:
+            screen.fill((25, 25, 25))
 
     #event listener
     for event in pygame.event.get():
@@ -824,20 +860,52 @@ while running:
                 if enemy.inRoom == currentRoom:
                     draw(enemyImg, enemy.x, enemy.y)
                     enemy.queue_move(currentTime)
-                    
+                    #Checks the collision with the player and the enemy. Removes health if collided
                     if (enemy.checkCollision(playerX, playerY, playerW, playerH)): 
                         print("collided with enemy")
                         if HP_DMG.cooldown(2) == True:
                             health_bar.hp = health_bar.hp - 10
+                    #checks the bullets for any collisions. Removes the enemy and bullet when collided
                     for bullet in bullets:
                         if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
                             print("bullet hit enemy")
                             enemies.remove(enemy)
+                            bullets.remove(bullet)
                             del enemy
                             break
                 else:
+                    #Resets the enemy to its original position when not in the room
                     enemy.reset_pos()
 
+    #moves boss and detect collision
+    for boss in bosses:
+        boss.move(delta)
+        if (boss.inRoom == currentRoom):
+            #draws the boss and its shield if not vulnerable
+            if (not boss.vulnerable):
+                pygame.draw.rect(screen, (100, 100, 255), (boss.x - 5, boss.y - 5, boss.w + 10, boss.h + 10))
+            draw(boss_img, boss.x, boss.y)
+            boss.toggle_vulnerability()
+            boss.queue_move(currentTime)   
+            #Checks collision with boss and player. Removes health on collide
+            if (boss.checkCollision(playerX, playerY, playerW, playerH)): 
+                print("collided with enemy")
+                if HP_DMG.cooldown(2) == True:
+                    health_bar.hp = health_bar.hp - 10
+            #Checks collision with boss and bullets
+            for bullet in bullets:
+                if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [boss.x, boss.y, boss.w, boss.h])):
+                    print("bullet hit boss")
+                    #Calls the hit method in the boss. Lowers the health if vulnerable
+                    m = boss.hit()
+                    if (m == "killed"):
+                        bosses.remove(boss)
+                        del boss
+                    bullets.remove(bullet)
+                    break
+        else:
+            #resets the boss position when not in the same room
+            boss.reset_pos()
 
     #checks for collisions in entrances.
     for room in rooms:
