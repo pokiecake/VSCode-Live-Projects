@@ -293,21 +293,7 @@ def check_timeouts():
     for spawner in spawners:
         for timeout in spawner.get_timeouts():
             if sec > timeout[0] + timeout[1]:
-                type = spawner.type
-                if type == "apple":
-                    pile = spawn_apple_pile(spawner.room)
-                    spawner.add_item(pile)
-                    spawner.remove_timeout(timeout)
-                elif type == "enemy":
-                    enemy = spawn_enemy(spawner.initial_pos, spawner.room)
-                    spawner.add_item(enemy)
-                    spawner.remove_timeout(timeout)
-                elif type == "boss":
-                    boss = spawn_boss(spawner.initial_pos, spawner.room)
-                    spawner.add_item(boss)
-                    spawner.remove_timeout(timeout)
-                else:
-                    print("type not recognized")
+                spawner.spawn(timeout)
         if spawner.type == "enemy":
             enemies = spawner.get_items()
             for enemy in enemies:
@@ -502,7 +488,7 @@ class Bosses(Enemies):
 
 #Will spawn stockpiles and enemies automatically
 class Spawners:
-    def __init__(self, type, room, max = 1, cooldown = 1, initial_pos = (0,0)):
+    def __init__(self, type, room, max = 1, cooldown = 3, initial_pos = (0,0)):
         self.type = type
         self.room = room
         self.items = []
@@ -534,11 +520,24 @@ class Spawners:
     def get_items(self):
         return self.items
 
+class AppleSpawners(Spawners):
+    def spawn(self, timeout):
+        pile = spawn_apple_pile(self.room)
+        self.add_item(pile)
+        self.remove_timeout(timeout)
+
 class EnemySpawners(Spawners):
-    pass
+    def spawn(self, timeout):
+        enemy = spawn_enemy(self.initial_pos, self.room)
+        self.add_item(enemy)
+        self.remove_timeout(timeout)
+
 
 class BossSpawners(Spawners):
-    pass
+    def spawn(self, timeout):
+        boss = spawn_boss(self.initial_pos, self.room)
+        self.add_item(boss)
+        self.remove_timeout(timeout)
 
 #class of healthbar
 
@@ -611,22 +610,22 @@ rooms.append(Rooms(16, [(15, 1), (17, 3)]))
 rooms.append(Rooms(17, [(16, 1)]))
 
 #adds a bunch of spawners
-spawners.append(Spawners("apple", 1))
-spawners.append(Spawners("apple", 2, 2))
-spawners.append(Spawners("apple", 3, 3))
-spawners.append(Spawners("apple", 4, 2))
-spawners.append(Spawners("apple", 5, 3))
-spawners.append(Spawners("apple", 6, 2))
-spawners.append(Spawners("apple", 7, 1))
-spawners.append(Spawners("apple", 8, 1))
-spawners.append(Spawners("apple", 9, 1))
-spawners.append(Spawners("apple", 10, 5))
-spawners.append(Spawners("apple", 11, 1))
-spawners.append(Spawners("apple", 12, 1))
-spawners.append(Spawners("apple", 13, 2))
-spawners.append(Spawners("apple", 14, 1))
-spawners.append(Spawners("apple", 15, 1))
-spawners.append(Spawners("apple", 16, 5))
+spawners.append(AppleSpawners("apple", 1))
+spawners.append(AppleSpawners("apple", 2))
+spawners.append(AppleSpawners("apple", 3, 2))
+spawners.append(AppleSpawners("apple", 4))
+spawners.append(AppleSpawners("apple", 5, 2))
+spawners.append(AppleSpawners("apple", 6))
+spawners.append(AppleSpawners("apple", 7, 1))
+spawners.append(AppleSpawners("apple", 8, 1))
+spawners.append(AppleSpawners("apple", 9, 2))
+spawners.append(AppleSpawners("apple", 10, 3))
+spawners.append(AppleSpawners("apple", 11))
+spawners.append(AppleSpawners("apple", 12))
+spawners.append(AppleSpawners("apple", 13, 1))
+spawners.append(AppleSpawners("apple", 14))
+spawners.append(AppleSpawners("apple", 15))
+spawners.append(AppleSpawners("apple", 16, 3))
 spawners.append(EnemySpawners("enemy", 5, 1, 5, (700, 400)))
 spawners.append(EnemySpawners("enemy", 3, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 10, 3, 5, (50, 50)))
