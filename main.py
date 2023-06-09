@@ -59,6 +59,8 @@ enemies = []
 #Apple spawners
 spawners = []
 
+
+
 #rooms
 rooms = []
 entranceW = 100
@@ -584,6 +586,9 @@ lastkey = ""
 #Controls speed when both opposite buttons pressed
 stuckspeed = 0.0 * playerSpeed
 
+#sets healthbar
+health_bar.hp = 100
+
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 running = True
 while running:
@@ -596,7 +601,6 @@ while running:
     #pygame.transform.scale_by(BGImage,20)
     #screen.blit(background, (0,0))
 
-    #draws healthbar
     
 
     match(currentRoom):
@@ -747,7 +751,9 @@ while running:
                 uphold = False
                 playerY_change = 0
 
+    #drawing hp bar
     
+    health_bar.draw(screen)
 
     #x and y change accounting for temporary speed
     playerX_change = playerSpeed * calcsign(playerX_change) + calcspeed(playerX_change)
@@ -801,6 +807,8 @@ while running:
                     enemy.queue_move(currentTime)
                     if (enemy.checkCollision(playerX, playerY, playerW, playerH)):
                         print("collided with enemy")
+                        health_bar.hp = health_bar.hp - 10
+                        
                     for bullet in bullets:
                         if (check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [enemy.x, enemy.y, enemy.w, enemy.h])):
                             print("bullet hit enemy")
@@ -832,9 +840,7 @@ while running:
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
     
-    #drawing hp bar
-    health_bar.hp = 100
-    health_bar.draw(screen)
+    
 
     #checks the spawners to see if a stockpile should be created
     check_timeouts()
