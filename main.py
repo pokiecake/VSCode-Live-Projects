@@ -701,7 +701,7 @@ while running:
                 tempspeed = playerSpeed
 
             else:
-                1==1
+                pass
 
             lastkey = event.key
 
