@@ -107,7 +107,7 @@ def gettime(roundnum):
 #time class will now be used to add more functions related to time
 class TimeConcept:
     def __init__(self):
-        1 == 1
+        pass
     
 
 
@@ -613,11 +613,10 @@ stuckspeed = 0.0 * playerSpeed
 
 #sets healthbar
 health_bar.hp = 100
-
-#Game Loop. When the x button is clicked, running is set to false and the window closes.
 HP_DMG = TimeConcept()
 
 running = True
+#Game Loop. When the x button is clicked, running is set to false and the window closes.
 while running:
     currentTime = gettime(12)
     delta = currentTime - lastTime
