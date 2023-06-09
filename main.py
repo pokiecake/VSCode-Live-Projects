@@ -54,6 +54,11 @@ enemyW = enemyImg.get_width()
 enemyH = enemyImg.get_height()
 enemies = []
 
+#Bosses
+boss_img = pygame.image.load("Sprites/Boss.png")
+boss_w = boss_img.get_width()
+boss_h = boss_img.get_height()
+
 #Apple spawners
 spawners = []
 
@@ -266,6 +271,12 @@ def spawn_enemy(pos, room):
     e = Enemies(x, y, enemyW, enemyH, room)
     return e
 
+def spawn_boss(pos, room):
+    x = pos[0]
+    y = pos[1]
+    b = Boss(x, y, bossW, bossH, room)
+    return b 
+
 #temporary timer to automatically create stockpiles after a delay
 def check_timeouts():
     sec = gettime(3)
@@ -282,6 +293,10 @@ def check_timeouts():
                     enemy = spawn_enemy(spawner.initial_pos, spawner.room)
                     spawner.add_item(enemy)
                     spawner.remove_timeout(timeout)
+                elif type == "boss":
+                    boss = spawn_boss(spawner.initial_pos, spawner.room)
+                    spawner.add_item(boss)
+                    spawner.remove_timeout(timeout)
                 else:
                     print("type not recognized")
         if spawner.type == "enemy":
@@ -295,6 +310,15 @@ def check_timeouts():
                         cooldown = timeout[2]
                         if sec > initialSec + cooldown:
                             enemy.start_move(timeout)
+        if spawner.type == "boss":
+            bosses = spawner.get_items()
+            for boss in bosses:
+                for timeout in boss.timeouts:
+                    if boss.inRoom == currentRoom:
+                        initial_sec = timeout[1]
+                        cooldown = timeout[2]
+                        if sec > initial_sec + cooldown:
+                            boss.start_move(timeout)
     #for sTime in stockpilesTimeouts:
         #if sec > sTime[0] + 1:
             #spawn_apple_pile(sTime[1])
@@ -461,7 +485,10 @@ class Spawners:
 
 class EnemySpawners(Spawners):
     pass
-    
+
+class Boss(Spawners):
+    pass
+
 #class of healthbar
 
 class HealthBar():
