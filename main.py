@@ -20,24 +20,7 @@ icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
 
 
-#class of healthbar
 
-class HealthBar():
-    def __init__(self, x, y, w, h, max_hp):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.hp = max_hp
-        self.max_hp = max_hp
-
-    def draw(self, surface):
-    #calculate health ratio  
-        ratio = self.hp / self.max_hp
-        pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
-        pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
-
-health_bar = HealthBar(250, 50, 400, 40, 100)
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
 playerImg = pygame.transform.scale(playerImg,(125,196))
@@ -491,7 +474,24 @@ class Spawners:
 class EnemySpawners(Spawners):
     pass
     
-    
+#class of healthbar
+
+class HealthBar():
+    def __init__(self, x, y, w, h, max_hp):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.hp = max_hp
+        self.max_hp = max_hp
+
+    def draw(self, surface):
+    #calculate health ratio  
+        ratio = self.hp / self.max_hp
+        pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
+        pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
+
+health_bar = HealthBar(250, 50, 400, 40, 100)
 
 #class for rooms
 class Rooms:
@@ -835,7 +835,7 @@ while running:
     #drawing hp bar
     health_bar.hp = 100
     health_bar.draw(screen)
-    
+
     #checks the spawners to see if a stockpile should be created
     check_timeouts()
 
