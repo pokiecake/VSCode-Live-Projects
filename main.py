@@ -474,6 +474,8 @@ class Bosses(Enemies):
         if (self.timeout_v.cooldown(self.cooldown)):
             self.vulnerable = not self.vulnerable
             self.cooldown = random.randint(5, 10)
+            if self.vulnerable:
+                self.cooldown = 3
 
     #handles a bullet hitting the boss.
     def hit(self):
@@ -850,7 +852,6 @@ while running:
                     #removes a pile if collided and adds to the apple bullet count
                     if pile.checkCollision(playerX, playerY, playerW, playerH):
                         spawner.remove_item(pile)
-                        del pile
                         appleBulletCount += 1
         #checks collision for enemies    
         elif spawner.type == "enemy":
@@ -871,7 +872,6 @@ while running:
                             print("bullet hit enemy")
                             enemies.remove(enemy)
                             bullets.remove(bullet)
-                            del enemy
                             break
                 else:
                     #Resets the enemy to its original position when not in the room
@@ -900,7 +900,6 @@ while running:
                     m = boss.hit()
                     if (m == "killed"):
                         bosses.remove(boss)
-                        del boss
                     bullets.remove(bullet)
                     break
         else:
