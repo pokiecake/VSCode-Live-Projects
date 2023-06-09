@@ -450,6 +450,10 @@ class Enemies:
     def checkCollision(self, pX, pY, pW, pH):
         return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
 
+#Boss class
+class Bosses(Enemies):
+    pass
+
 #Will spawn stockpiles and enemies automatically
 class Spawners:
     def __init__(self, type, room, max = 1, cooldown = 1, initial_pos = (0,0)):
@@ -487,7 +491,7 @@ class Spawners:
 class EnemySpawners(Spawners):
     pass
 
-class Boss(Spawners):
+class BossSpawners(Spawners):
     pass
 
 #class of healthbar
@@ -557,7 +561,8 @@ rooms.append(Rooms(12, [(11, 0), (13, 3)]))
 rooms.append(Rooms(13, [(12, 1), (14, 0)]))
 rooms.append(Rooms(14, [(15, 0), (11, 1), (13, 2)]))
 rooms.append(Rooms(15, [(14, 2), (16, 3)]))
-rooms.append(Rooms(16, [(15, 1)]))
+rooms.append(Rooms(16, [(15, 1), (17, 3)]))
+rooms.append(Rooms(17, [(16, 1)]))
 
 #adds a bunch of spawners
 spawners.append(Spawners("apple", 1))
@@ -582,8 +587,8 @@ spawners.append(EnemySpawners("enemy", 10, 3, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
-#adds enemies
-enemies.append(Enemies(0, 200, enemyW, enemyH, 3))\
+#adds bosses
+bosses.append(Bosses(350, 300, boss_w, boss_h, 17))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
