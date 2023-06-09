@@ -1,6 +1,3 @@
-Mouse tracking:
-Done!
-
 Camera:
 only if bigger rooms
 
@@ -10,8 +7,6 @@ Finished :) (for now)
 -Bigger rooms? (requires camera movement)
 
 Enemies:
--Spawn in some of the rooms
--Kill them when shot with apples
 -Boss?
 
 Weapons:
