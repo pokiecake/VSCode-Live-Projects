@@ -2,7 +2,7 @@ Mouse tracking:
 Done!
 
 Camera:
-Gave up?
+only if bigger rooms
 
 Rooms:
 Finished :) (for now)

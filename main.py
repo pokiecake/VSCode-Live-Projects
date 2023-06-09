@@ -19,6 +19,25 @@ pygame.display.set_caption("Buffet Wars")
 icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
 
+
+#class of healthbar
+
+class HealthBar():
+    def __init__(self, x, y, w, h, max_hp):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.hp = max_hp
+        self.max_hp = max_hp
+
+    def draw(self, surface):
+    #calculate health ratio  
+        ratio = self.hp / self.max_hp
+        pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
+        pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
+
+health_bar = HealthBar(250, 200, 100, 40, 100)
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
 playerImg = pygame.transform.scale(playerImg,(125,196))
@@ -181,6 +200,8 @@ def showtime(x,y):
     timecount = timefont.render("Time elapsed: " + str(gettime(3)), True, (0,0,255))
     screen.blit(timecount, (x,y))
 
+
+
 #Background
 background = pygame.Surface((screenWidth, screenHeight))
 
@@ -188,7 +209,7 @@ BGImage = pygame.image.load("Assets/spongebob.png")
 
 BGImage = pygame.transform.scale(BGImage,(screenWidth, screenHeight))
 
-# camera setup
+
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -324,6 +345,10 @@ def find_angle(pos1, pos2):
     dirY = 1 if deltaY > 0 else -1
     angle = abs(math.atan((deltaY) / (deltaX)))
     return (angle, dirX, dirY)
+
+
+
+
 
 #class for apple bullets
 class AppleBullets:
@@ -570,6 +595,11 @@ while running:
     #draws spongebob background
     #pygame.transform.scale_by(BGImage,20)
     #screen.blit(background, (0,0))
+
+    #draws healthbar
+    health_bar.hp = 100
+    health_bar.draw(screen)
+
     match(currentRoom):
         case 1:
             screen.blit(BGImage, (0,0))
