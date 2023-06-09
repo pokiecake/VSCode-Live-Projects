@@ -55,6 +55,7 @@ enemyImg = pygame.transform.scale(enemyImg, (125,196))
 enemyW = enemyImg.get_width()
 enemyH = enemyImg.get_height()
 enemies = []
+enemies_killed = 0
 
 #Apple spawners
 spawners = []
@@ -70,9 +71,11 @@ ammofont = pygame.font.Font('freesansbold.ttf',32)
 ammox = 0
 ammoy = 0
 enterPopupX = 0
-enterPopupY = 50
+enterPopupY = 100
 roomX = 650
 roomY = 0
+ekX = 0
+ekY = 500
 def showammo(x,y):
     ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
     screen.blit(ammocount, (x,y))
@@ -84,6 +87,10 @@ def showEnterPopup(x, y):
 def showRoom(x, y):
     popup = ammofont.render("Room: {0}".format(currentRoom), True, (255, 0, 0))
     screen.blit(popup, (x,y))
+
+def show_enemies_killed(x, y):
+    popup = ammofont.render("Enemies killed: {0}".format(enemies_killed), True, (255, 0, 0))
+    screen.blit(popup, (x, y))
 
 #gets the time when the program started
 timestart = time.time()
@@ -806,6 +813,7 @@ while running:
                             print("bullet hit enemy")
                             enemies.remove(enemy)
                             del enemy
+                            enemies_killed += 1
                             break
                 else:
                     enemy.reset_pos()
@@ -828,6 +836,7 @@ while running:
     showammo(ammox,ammoy)
     showtime(timex,timey)
     showRoom(roomX, roomY)
+    show_enemies_killed(ekX, ekY)
     if (inEntrance != -1):
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
@@ -836,7 +845,7 @@ while running:
     health_bar.hp = 100
     health_bar.draw(screen)
 
-    #checks the spawners to see if a stockpile should be created
+    #checks any kind of cooldowns to spawn things like stockpiles or enemies
     check_timeouts()
 
     lastTime = currentTime
