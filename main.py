@@ -4,60 +4,7 @@ import random
 import time
 import asyncio
 import math
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
+
 
 # Intialize the pygame
 pygame.init()
@@ -83,42 +30,6 @@ playerX_change = 0
 playerY_change = 0
 playerSpeed = 500
 playerDirection = 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 currentRoom = 1
 
 #Apple
@@ -151,119 +62,6 @@ bosses = []
 
 #Apple spawners
 spawners = []
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
 
 #rooms
 rooms = []
@@ -278,52 +76,6 @@ ammoy = 0
 enterPopupX = 0
 enterPopupY = 50
 roomX = 650
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-
 roomY = 0
 def showammo(x,y):
     ammocount = ammofont.render("Ammo: " + str(appleBulletCount), True, (255,0,0))
@@ -339,37 +91,6 @@ def showRoom(x, y):
 
 #gets the time when the program started
 timestart = time.time()
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
 
 #Note: time.time() gets the time from the time their code was made; must get relative time
 
@@ -385,78 +106,6 @@ class TimeConcept:
     def __init__(self):
         pass
     
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
-    """"""
 
     #the following gets the time elapsed since last call
     #oldtime1 is oldtime for cooldowns, oldtime2 is oldtime for time windows
@@ -472,27 +121,7 @@ class TimeConcept:
     
     def cooldown(self, amount):
         global oldtime1
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-        """"""
-
+        
         timepassed = self.timeelapsed()
         if timepassed >= amount:
             oldtime1 = gettime(99)
@@ -643,26 +272,6 @@ def spawn_enemy(pos, room):
     e = Enemies(x, y, enemyW, enemyH, room)
     return e
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def spawn_boss(pos, room):
     x = pos[0]
     y = pos[1]
@@ -686,44 +295,10 @@ def check_timeouts():
                     spawner.add_item(enemy)
                     spawner.remove_timeout(timeout)
                 elif type == "boss":
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     boss = spawn_boss(spawner.initial_pos, spawner.room)
                     spawner.add_item(boss)
                     spawner.remove_timeout(timeout)
                 else:
-
                     print("type not recognized")
         if spawner.type == "enemy":
             enemies = spawner.get_items()
@@ -796,63 +371,7 @@ class AppleStockpiles:
         self.w = w
         self.h = h
         self.inRoom = inRoom
-    """"""
-    """"""
-    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""
+    
     #checks for collision in the horizontal and vertical direction
     def checkCollision(self, pX, pY, pW, pH):
         return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
@@ -863,52 +382,6 @@ class AppleStockpiles:
     
     def getPos(self):
         return (self.x, self.y)
-
-
-
-
-
-
-
-
-
-
-
-
-
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-""""""
-
-
-
-
-
-
-
-
-
-
-
 
 #Class for enemies
 class Enemies:
@@ -946,11 +419,6 @@ class Enemies:
             if (self.x * self.dir[0] >= self.targetPos[0] * self.dir[0]):
                 self.change_x = False
                 self.x = self.targetPos[0]
-                """"""
-                """"""
-                """"""
-                """"""
-                """"""
             if (self.y * self.dir[1] >= self.targetPos[1] * self.dir[1]):
                 self.change_y = False
                 self.y = self.targetPos[1]
@@ -958,8 +426,7 @@ class Enemies:
                 self.moving = False
         #print((self.x, self.y))
        # print((self.change_x, self.change_y))
-    """"""
-    """"""
+
     def queue_move(self, sec):
         if (not self.moving and not self.move_queued):
             self.move_queued = True
@@ -975,10 +442,6 @@ class Enemies:
         angle = angle_and_dir[0]
         dirX = angle_and_dir[1]
         dirY = angle_and_dir[2]
-
-        """"""
-        """"""    """"""
-        """"""
         self.dir = (dirX, dirY)
         self.change_x = math.cos(angle) * self.speed * dirX
         self.change_y = math.sin(angle) * self.speed * dirY
@@ -986,18 +449,6 @@ class Enemies:
 
     def checkCollision(self, pX, pY, pW, pH):
         return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
-
-    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""
 
 #Will spawn stockpiles and enemies automatically
 class Spawners:
@@ -1036,7 +487,7 @@ class Spawners:
 class EnemySpawners(Spawners):
     pass
 
-class BossSpawners(Spawners):
+class Boss(Spawners):
     pass
 
 #class of healthbar
@@ -1049,97 +500,7 @@ class HealthBar():
         self.h = h
         self.hp = max_hp
         self.max_hp = max_hp
-    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""    """"""
-    """"""
+
     def draw(self, surface):
     #calculate health ratio  
         ratio = self.hp / self.max_hp
@@ -1204,47 +565,6 @@ spawners.append(Spawners("apple", 2, 2))
 spawners.append(Spawners("apple", 3, 3))
 spawners.append(Spawners("apple", 4, 2))
 spawners.append(Spawners("apple", 5, 3))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 spawners.append(Spawners("apple", 6, 2))
 spawners.append(Spawners("apple", 7, 1))
 spawners.append(Spawners("apple", 8, 1))
@@ -1263,8 +583,7 @@ spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds enemies
-enemies.append(Enemies(0, 200, enemyW, enemyH, 3))
-bosses.append()
+enemies.append(Enemies(0, 200, enemyW, enemyH, 3))\
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -1284,71 +603,6 @@ stuckspeed = 0.0 * playerSpeed
 #sets healthbar
 health_bar.hp = 100
 HP_DMG = TimeConcept()
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 running = True
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
@@ -1382,32 +636,6 @@ while running:
         case 9:
             screen.fill((230, 230, 230))
         case 10:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             screen.fill((255, 255, 255))
         case 11:
             screen.fill((125, 150, 125))
@@ -1423,19 +651,6 @@ while running:
             screen.fill((20, 20, 20))
 
     #event listener
-
-
-
-
-
-
-
-
-
-
-
-
-
     for event in pygame.event.get():
         #stops the game when the x button is pressed
         if event.type == pygame.QUIT:
@@ -1463,21 +678,6 @@ while running:
                 lefthold = True
             if event.key == pygame.K_RIGHT and lefthold == False:
                 playerX_change = playerSpeed
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 righthold = True
             elif event.key == pygame.K_RIGHT and lefthold == True:
                 playerX_change = -stuckspeed
@@ -1485,23 +685,6 @@ while running:
 
             if event.key == pygame.K_UP and downhold == False:
                 playerY_change = -playerSpeed
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 uphold = True
             elif event.key == pygame.K_UP and downhold == True:
                 playerY_change = stuckspeed
@@ -1519,7 +702,7 @@ while running:
                 tempspeed = playerSpeed
 
             else:
-                pass
+                1==1
 
             lastkey = event.key
 
@@ -1527,72 +710,15 @@ while running:
             if event.key == pygame.K_w:
                 playerDirection = 0
             if event.key == pygame.K_d:
-
-
-
-
-
-
-
-
-
-
-
-
                 playerDirection = 1
             if event.key == pygame.K_s:
                 playerDirection = 2
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             if event.key == pygame.K_a:
                 playerDirection = 3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             if event.key == pygame.K_SPACE:
                 if appleBulletCount > 0:
                     fire_apple(playerX, playerY)
                     appleBulletCount -= 1
-
-
-
-
-
-
-
-
             
             #changes the room when at an entrance. (not for testing purposes)
             if event.key == pygame.K_e and inEntrance != -1:
@@ -1615,31 +741,6 @@ while running:
             if event.key == pygame.K_LEFT and righthold == True:
                 playerX_change = playerSpeed
                 lefthold = False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             elif event.key == pygame.K_RIGHT and lefthold == True:
                 playerX_change = -playerSpeed
                 righthold = False
@@ -1655,56 +756,10 @@ while running:
                 uphold = False
             elif event.key == pygame.K_DOWN and uphold == True:
                 playerY_change = -playerSpeed
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 downhold = False
             elif event.key == pygame.K_DOWN:
                 downhold = False
                 playerY_change = 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             elif event.key == pygame.K_UP:
                 uphold = False
                 playerY_change = 0
@@ -1749,21 +804,6 @@ while running:
             stockpiles = spawner.get_items()
             for pile in stockpiles:
                 pos = pile.getPos()
-
-
-
-
-                """"""
-
-                """"""
-
-
-
-
-
-
-
-
                 if currentRoom == pile.inRoom:
                     draw_apple(pos[0], pos[1])
                     #removes a pile if collided and adds to the apple bullet count
@@ -1771,23 +811,6 @@ while running:
                         spawner.remove_item(pile)
                         del pile
                         appleBulletCount += 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         #checks collision for enemies    
         elif spawner.type == "enemy":
             enemies = spawner.get_items()
@@ -1796,43 +819,8 @@ while running:
                 if enemy.inRoom == currentRoom:
                     draw(enemyImg, enemy.x, enemy.y)
                     enemy.queue_move(currentTime)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     
                     if (enemy.checkCollision(playerX, playerY, playerW, playerH)): 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        
                         print("collided with enemy")
                         if HP_DMG.cooldown(2) == True:
                             health_bar.hp = health_bar.hp - 10
@@ -1858,45 +846,6 @@ while running:
 
     #draws the players and apples
     player(playerX, playerY)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     #draws text & other assets
     showammo(ammox,ammoy)

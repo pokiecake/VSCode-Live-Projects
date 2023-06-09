@@ -4,7 +4,6 @@ import random
 import time
 import asyncio
 import math
-import math
 
 
 # Intialize the pygame
@@ -47,6 +46,19 @@ appleBulletCount = 0
 #Apple Stockpiles
 #stockpiles = []
 #stockpilesTimeouts = []
+
+#Enemies
+enemyImg = pygame.image.load("Sprites/fob.png")
+enemyImg = pygame.transform.scale(enemyImg, (125,196))
+enemyW = enemyImg.get_width()
+enemyH = enemyImg.get_height()
+enemies = []
+
+#Bosses
+boss_img = pygame.image.load("Sprites/Boss.png")
+boss_w = boss_img.get_width()
+boss_h = boss_img.get_height()
+bosses = []
 
 #Apple spawners
 spawners = []
@@ -371,7 +383,74 @@ class AppleStockpiles:
     def getPos(self):
         return (self.x, self.y)
 
-#Will spawn stockpiles automatically
+#Class for enemies
+class Enemies:
+    def __init__(self, x, y, w, h, inRoom):
+        self.initialX = x
+        self.initialY = y
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.targetPos = (0, 0)
+        self.dir = (0, 0)
+        self.inRoom = inRoom
+        self.change_x = 0
+        self.change_y = 0
+        self.timeouts = []
+        self.move_queued = False
+        self.moving = False
+        self.speed = 400
+    
+    def reset_pos(self):
+        self.x = self.initialX
+        self.y = self.initialY
+        self.targetPos = (0, 0)
+        self.move_queued = False
+        self.moving = False
+        self.change_x = 0
+        self.change_y = 0
+        self.dir = (0, 0)
+
+    def move(self, delta):
+        if (self.moving == True):
+            self.x += self.change_x  * delta
+            self.y += self.change_y * delta
+            if (self.x * self.dir[0] >= self.targetPos[0] * self.dir[0]):
+                self.change_x = False
+                self.x = self.targetPos[0]
+            if (self.y * self.dir[1] >= self.targetPos[1] * self.dir[1]):
+                self.change_y = False
+                self.y = self.targetPos[1]
+            if (not self.change_x and not self.change_y):
+                self.moving = False
+        #print((self.x, self.y))
+       # print((self.change_x, self.change_y))
+
+    def queue_move(self, sec):
+        if (not self.moving and not self.move_queued):
+            self.move_queued = True
+            random_pos = (random.randint(0, screenWidth - self.w), random.randint(0, screenHeight - self.h))
+            self.timeouts.append(((random_pos), sec, 3))
+            print("move queued")
+    
+    def start_move(self, timeout):
+        self.move_queued = False
+        self.moving = True
+        self.targetPos = timeout[0]
+        angle_and_dir = find_angle((self.x, self.y), self.targetPos)
+        angle = angle_and_dir[0]
+        dirX = angle_and_dir[1]
+        dirY = angle_and_dir[2]
+        self.dir = (dirX, dirY)
+        self.change_x = math.cos(angle) * self.speed * dirX
+        self.change_y = math.sin(angle) * self.speed * dirY
+        self.timeouts.remove(timeout)
+
+    def checkCollision(self, pX, pY, pW, pH):
+        return check_collisions([self.x, self.y, self.w, self.h], [pX, pY, pW, pH])
+
+#Will spawn stockpiles and enemies automatically
 class Spawners:
     def __init__(self, type, room, max = 1, cooldown = 1, initial_pos = (0,0)):
         self.type = type
@@ -396,11 +475,39 @@ class Spawners:
     def add_item(self, pile):
         self.items.append(pile)
     
-    def check_for_stockpiles(self):
-        if (self.stockpiles.__len__() < self.maxStockpiles):
-            self.queuedStockpiles += 1
-            self.stockpiles.append(spawn_apple_pile())
+    def remove_item(self, pile):
+        self.items.remove(pile)
+    
+    def get_timeouts(self):
+        return self.timeouts
+    
+    def get_items(self):
+        return self.items
 
+class EnemySpawners(Spawners):
+    pass
+
+class Boss(Spawners):
+    pass
+
+#class of healthbar
+
+class HealthBar():
+    def __init__(self, x, y, w, h, max_hp):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.hp = max_hp
+        self.max_hp = max_hp
+
+    def draw(self, surface):
+    #calculate health ratio  
+        ratio = self.hp / self.max_hp
+        pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
+        pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
+
+health_bar = HealthBar(250, 50, 400, 40, 100)
 
 #class for rooms
 class Rooms:
@@ -476,7 +583,7 @@ spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds enemies
-enemies.append(Enemies(0, 200, enemyW, enemyH, 3))
+enemies.append(Enemies(0, 200, enemyW, enemyH, 3))\
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -589,6 +696,16 @@ while running:
                 playerY_change = -stuckspeed
                 downhold = True
             
+            #testing key presses here
+            dash = TimeConcept()
+            if dash.timewindow(0.5) and lastkey == event.key:
+                tempspeed = playerSpeed
+
+            else:
+                1==1
+
+            lastkey = event.key
+
             #changes the direction of the player's shooting
             if event.key == pygame.K_w:
                 playerDirection = 0
