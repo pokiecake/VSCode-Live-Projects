@@ -459,7 +459,7 @@ class Bosses(Enemies):
         self.health = 5
         self.vulnerable = False
         self.timeout_v = 0
-        self.cooldown = random.randint(5, 10)
+        self.cooldown = random.randint(5, 8)
 
     #switches the vulnerability of the boss after a cooldown
     def toggle_vulnerability(self):
@@ -564,27 +564,46 @@ class Rooms:
         #entrances will be an object that holds the room it can connect to and the direction (North, East, South, West) it connects from
         #the long side is dependent on where the entrance is. You can ask me to clarify if you need to -Tony
         self.num = num
-        self.entrances = entrances
+        self.entrances = []
         self.long = 200
         self.short = 100
+        for entrance in entrances:
+            match entrance.__len__():
+                case 2:
+                    self.entrances.append(Entrances(entrance[0], entrance[1]))
+                case 3:
+                    self.entrances.append(Entrances(entrance[0], entrance[1], entrance[2]))
     #If there is a collision, the entrance tuple will be returned (so that the game loop knows the entrance #)
     def checkCollisions(self, pX, pY, pW, pH):
         target2P = [pX, pY, pW, pH]
         for entrance in self.entrances:
+            if (not entrance.open):
+                continue
+            vals = entrance.get_vals()
             #0 = North, 1 = East, 2 = South, 3 = West
-            if (entrance[1] == 0):
+            if (vals[1] == 0):
                 if (check_collisions([300, 0, self.long, self.short], target2P)):
                     return entrance
-            if (entrance[1] == 1):
+            if (vals[1] == 1):
                 if (check_collisions([700, 200, self.short, self.long], target2P)):
                     return entrance
-            if (entrance[1] == 2):
+            if (vals[1] == 2):
                 if (check_collisions([300, 500, self.long, self.short], target2P)):
                     return entrance
-            if (entrance[1] == 3):
+            if (vals[1] == 3):
                 if (check_collisions([0, 200, self.short, self.long], target2P)):
                     return entrance
         return False  
+
+#Class for entrances
+class Entrances:
+    def __init__(self, room, door, open = True):
+        self.room = room
+        self.door = door
+        self.open = open
+
+    def get_vals(self):
+        return (self.room, self.door, self.open)
 
 #spawns an apple pile in room 1 and room 2
 #spawn_apple_pile(1)
@@ -607,7 +626,8 @@ rooms.append(Rooms(13, [(12, 1), (14, 0)]))
 rooms.append(Rooms(14, [(15, 0), (11, 1), (13, 2)]))
 rooms.append(Rooms(15, [(14, 2), (16, 3)]))
 rooms.append(Rooms(16, [(15, 1), (17, 3)]))
-rooms.append(Rooms(17, [(16, 1)]))
+rooms.append(Rooms(17, [(16, 1), (18, 3, False)]))
+rooms.append(Rooms(18, [(17, 1)]))
 
 #adds a bunch of spawners
 spawners.append(AppleSpawners("apple", 1))
@@ -669,7 +689,6 @@ while running:
     #draws spongebob background
     #pygame.transform.scale_by(BGImage,20)
     #screen.blit(background, (0,0))
-
     match(currentRoom):
         case 1:
             screen.blit(BGImage, (0,0))
@@ -680,7 +699,7 @@ while running:
         case 4:
             screen.fill((100, 225, 100))
         case 5:
-            screen.fill((255, 255, 0))
+            screen.fill((200, 255, 0))
         case 6:
             screen.fill((200, 200, 200))
         case 7:
@@ -705,6 +724,10 @@ while running:
             screen.fill((30, 30, 30))
         case 17:
             screen.fill((25, 25, 25))
+        case 18:
+            screen.fill((255, 255, 0))
+            text = ammofont.render("Treasure :)", True, (255, 0, 0))
+            screen.blit(text, (340, 275))
 
     #event listener
     for event in pygame.event.get():
@@ -915,6 +938,7 @@ while running:
                     if (m == "killed"):
                         bosses.remove(boss)
                         enemies_killed += 1
+                        rooms[16].entrances[1].open = True
                     bullets.remove(bullet)
                     break
         else:
@@ -927,7 +951,7 @@ while running:
             entrance = room.checkCollisions(playerX, playerY, playerW, playerH)
             if entrance != False:
                 #if r is pressed, the player will enter the room
-                inEntrance = entrance
+                inEntrance = entrance.get_vals()
             else:
                 inEntrance = -1
 
