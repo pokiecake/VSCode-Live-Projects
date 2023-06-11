@@ -12,6 +12,9 @@ pygame.init()
 # create the screen
 screenWidth = 800
 screenHeight = 600
+#testing purposes
+#screenWidth = 1280
+#screenHeight = 1024
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 
 #Title and Icon
@@ -460,10 +463,10 @@ class Bosses(Enemies):
     #some values needed for the boss
     def set_boss_values(self):
         self.speed = 700
-        self.health = 5
+        self.health = 10
         self.vulnerable = False
         self.timeout_v = 0
-        self.cooldown = random.randint(5, 8)
+        self.cooldown = random.randint(5, 7)
         self.attack_target_pos = (0, 0)
         self.attack_cooldown = 0
 
@@ -476,7 +479,7 @@ class Bosses(Enemies):
             print("cooldown")
             print(self.cooldown)
             self.vulnerable = not self.vulnerable
-            self.cooldown = random.randint(5, 8)
+            self.cooldown = random.randint(5, 7)
             #When vulnerable, the cooldown is always 3 to toggle the shield on again
             if self.vulnerable:
                 self.cooldown = 3
@@ -618,16 +621,16 @@ class Rooms:
             vals = entrance.get_vals()
             #0 = North, 1 = East, 2 = South, 3 = West
             if (vals[1] == 0):
-                if (check_collisions([300, 0, self.long, self.short], target2P)):
+                if (check_collisions([(screenWidth - self.long) / 2, 0, self.long, self.short], target2P)):
                     return entrance
             if (vals[1] == 1):
-                if (check_collisions([700, 200, self.short, self.long], target2P)):
+                if (check_collisions([screenWidth - self.short, (screenHeight - self.long) / 2, self.short, self.long], target2P)):
                     return entrance
             if (vals[1] == 2):
-                if (check_collisions([300, 500, self.long, self.short], target2P)):
+                if (check_collisions([(screenWidth - self.long) / 2, screenHeight - self.short, self.long, self.short], target2P)):
                     return entrance
             if (vals[1] == 3):
-                if (check_collisions([0, 200, self.short, self.long], target2P)):
+                if (check_collisions([0, (screenHeight - self.long) / 2, self.short, self.long], target2P)):
                     return entrance
         return False  
 
