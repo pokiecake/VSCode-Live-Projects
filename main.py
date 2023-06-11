@@ -435,12 +435,45 @@ class Enemies:
         #print((self.x, self.y))
        # print((self.change_x, self.change_y))
 
+    def look(self):
+        # 0 means left and up resp, 1 means right and down resp; -1 is null
+        result = [-1,-1]
+        if self.x >= playerX:
+            result[0] = 0
+        elif self.x < playerX:
+            result[0] = 1
+        if self.y >= playerY:
+            result[1] = 0
+        elif self.y < playerY:
+            result[1] = 1
+        
+        return result
+
     def queue_move(self, sec):
+        #this is temporary to test the targetting system (either all enemies target or none do at the moment)
+        target_player = True
         if (not self.moving and not self.move_queued):
-            self.move_queued = True
-            random_pos = (random.randint(0, screenWidth - self.w), random.randint(0, screenHeight - self.h))
-            self.timeouts.append(((random_pos), sec, 3))
-            print("move queued")
+            if target_player:
+                self.move_queued = True
+                scan = self.look()
+                print(str(scan))
+                random_poslist = [-1, -1]
+                if scan[0] == 0:
+                    random_poslist[0] = random.randint(0, self.x)
+                elif scan[0] == 1:
+                    random_poslist[0] = random.randint(self.x, screenWidth - self.w)
+                if scan[1] == 0:
+                    random_poslist[1] = random.randint(0, self.y)
+                elif scan[1] == 1:
+                    random_poslist[1] = random.randint(self.y, screenHeight - self.h)
+                random_pos = tuple(random_poslist)
+                self.timeouts.append(((random_pos), sec, 3))
+                print("move queued; target")
+            else:
+                self.move_queued = True
+                random_pos = (random.randint(0, screenWidth - self.w), random.randint(0, screenHeight - self.h))
+                self.timeouts.append(((random_pos), sec, 3))
+                print("move queued")
     
     def start_move(self, timeout):
         self.move_queued = False
