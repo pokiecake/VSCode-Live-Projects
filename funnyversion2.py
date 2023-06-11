@@ -1,3 +1,7 @@
+"""
+It's Touhou time
+"""
+
 import pygame
 from pygame import mixer
 import random
@@ -111,9 +115,9 @@ def gettime(roundnum):
 #time class will now be used to add more functions related to time
 class TimeConcept:
     def __init__(self):
-        #initializes the time variables at the start of creation
-        self.oldtime1 = gettime(99)
-        self.oldtime2 = gettime(99)
+        self.oldtime1 = 0
+        self.oldtime2 = 0
+    
 
     #the following gets the time elapsed since last call
     #oldtime1 is oldtime for cooldowns, oldtime2 is oldtime for time windows
@@ -415,7 +419,6 @@ class Enemies:
         self.change_x = 0
         self.change_y = 0
         self.dir = (0, 0)
-        self.timeouts = []
 
     def move(self, delta):
         if (self.moving == True):
@@ -477,7 +480,6 @@ class Bosses(Enemies):
             print(self.cooldown)
             self.vulnerable = not self.vulnerable
             self.cooldown = random.randint(5, 8)
-            #When vulnerable, the cooldown is always 3 to toggle the shield on again
             if self.vulnerable:
                 self.cooldown = 3
 
@@ -493,16 +495,13 @@ class Bosses(Enemies):
     def reset(self):
         self.reset_pos()
         self.timeout_v = 0
-        self.cooldown = random.randint(5, 8)
+        self.cooldown = random.randint(5, 10)
         self.attack_cooldown = 0
     
-    #Sets the target pos at the player's center
     def set_attack_target_pos(self):
         self.attack_target_pos = (playerX + playerW / 2, playerY + playerH / 2)
     
-    #Fires an apple in the player's direction
     def attack(self):
-        #Math you don't need to worry about (just creates an apple and centers it on the boss
         self.set_attack_target_pos();
         pos = self.attack_target_pos
         center_x = self.x + (boss_w - appleW) / 2
@@ -511,9 +510,8 @@ class Bosses(Enemies):
         angle = a[0]
         dir_x = a[1]
         dir_y = a[2]
-        bullets.append(AppleBullets(center_x, center_y, appleW, appleH, 1000 * math.cos(angle) * dir_x, 1000 * math.sin(angle) * dir_y, "boss"))
+        bullets.append(AppleBullets(center_x, center_y, appleW, appleH, 2000 * math.cos(angle) * dir_x, 2000 * math.sin(angle) * dir_y, "boss"))
     
-    #Will attempt an attack. Attack is successful 3 seconds after the initial attack. Creates a new timeconcept if there is none
     def attempt_attack(self):
         if (self.attack_cooldown == 0):
             self.attack_cooldown = TimeConcept()
@@ -521,6 +519,7 @@ class Bosses(Enemies):
         elif (self.attack_cooldown.cooldown(3)):
             print("attacking")
             self.attack()
+            self.attack_cooldown = 0
 
 #Will spawn stockpiles and enemies automatically
 class Spawners:
@@ -689,7 +688,7 @@ spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds bosses
-bosses.append(Bosses(100, 200, boss_w, boss_h, 17))
+bosses.append(Bosses(275, 200, boss_w, boss_h, 17))
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -703,10 +702,6 @@ righthold = False
 uphold = False
 downhold = False
 lastkey = ""
-
-#Keeps track of dash time
-dash = TimeConcept()
-
 #Controls speed when both opposite buttons pressed
 stuckspeed = 0.0 * playerSpeed
 
@@ -721,7 +716,7 @@ for boss in bosses:
 running = True
 
 #Debug code
-currentRoom = 1
+currentRoom = 17
 
 #Game Loop. When the x button is clicked, running is set to false and the window closes.
 while running:
@@ -820,11 +815,12 @@ while running:
                 downhold = True
             
             #testing key presses here
+            dash = TimeConcept()
             if dash.timewindow(0.5) and lastkey == event.key:
                 tempspeed = playerSpeed
 
             else:
-                pass
+                1==1
 
             lastkey = event.key
 
@@ -917,11 +913,11 @@ while running:
         if x < 0 or x > screenWidth or y < 0 or y > screenHeight:
             bullets.remove(bullet)
             pass
-        if bullet.owner == "boss" and check_collisions((bullet.x, bullet.y, bullet.w, bullet.h), (playerX, playerY, playerW, playerH)):
-            bullets.remove(bullet)
-            if HP_DMG.cooldown(2):
-                print("player hit by boss's bullet")
-                health_bar.hp = health_bar.hp - 10
+        #if bullet.owner == "boss" and check_collisions((bullet.x, bullet.y, bullet.w, bullet.h), (playerX, playerY, playerW, playerH)):
+        #    bullets.remove(bullet)
+        #    if HP_DMG.cooldown(2):
+        #        print("player hit by boss's bullet")
+        #        health_bar.hp = health_bar.hp - 10
     #checks for collision for all spawners
     
     for spawner in spawners:
@@ -947,7 +943,8 @@ while running:
                     enemy.queue_move(currentTime)
                     #Checks the collision with the player and the enemy. Removes health if collided
                     if (enemy.checkCollision(playerX, playerY, playerW, playerH)): 
-                        if HP_DMG.cooldown(2):
+                        #if HP_DMG.cooldown(2):
+                        if False:
                             print("hit by enemy")
                             health_bar.hp = health_bar.hp - 10
                     #checks the bullets for any collisions. Removes the enemy and bullet when collided
@@ -964,23 +961,19 @@ while running:
 
     #moves boss and detect collision
     for boss in bosses:
+        #boss.move(delta)
         if (boss.inRoom == currentRoom):
-            #Makes the boss move and attempt an attack
-            boss.move(delta)
             boss.attempt_attack()
-
             #draws the boss and its shield if not vulnerable
             if (not boss.vulnerable):
                 pygame.draw.rect(screen, (100, 100, 255), (boss.x - 5, boss.y - 5, boss.w + 10, boss.h + 10))
             draw(boss_img, boss.x, boss.y)
             boss.toggle_vulnerability()
-
-            #Queues a movement opportunity
             boss.queue_move(currentTime)   
-
             #Checks collision with boss and player. Removes health on collide
             if (boss.checkCollision(playerX, playerY, playerW, playerH)): 
-                if HP_DMG.cooldown(2):
+                #if HP_DMG.cooldown(2):
+                if False:
                     print("hit by enemy")
                     health_bar.hp = health_bar.hp - 10
             #Checks collision with boss and bullets
@@ -1010,7 +1003,10 @@ while running:
                 inEntrance = -1
 
     #draws the players and apples
-    player(playerX, playerY)
+    if (HP_DMG.cooldown(2, False)):
+        player(playerX, playerY)
+    else:
+        draw(appleImg, playerX, playerY)
     #draws text & other assets
     showammo(ammox,ammoy)
     showtime(timex,timey)
@@ -1020,14 +1016,6 @@ while running:
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
     
-    #Code that makes the player's sprite different when damaged. It currently turns the player into an apple
-    """
-    if (HP_DMG.cooldown(2, False)):
-        player(playerX, playerY)
-    else:
-        draw(appleImg, playerX, playerY)
-    """
-
     #checks the spawners to see if a stockpile should be created
     check_timeouts()
 
