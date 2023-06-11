@@ -7,7 +7,7 @@ Finished :) (for now)
 -Bigger rooms? (requires camera movement)
 
 Enemies:
--Boss?
+-Boss? (done)
 
 Weapons:
 -different types of bullets (I have made sprites of other fruit)
