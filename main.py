@@ -204,7 +204,7 @@ def showtime(x,y):
 #Background
 background = pygame.Surface((screenWidth, screenHeight))
 
-BGImage = pygame.image.load("Assets/spongebob.png")
+BGImage = pygame.image.load("Backgrounds/Cityscape.png")
 
 BGImage = pygame.transform.scale(BGImage,(screenWidth, screenHeight))
 
@@ -640,7 +640,7 @@ class HealthBar():
         pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
         pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
 
-health_bar = HealthBar(250, 50, 400, 40, 100)
+health_bar = HealthBar(390, 550, 400, 40, 100)
 
 #class for rooms
 class Rooms:
