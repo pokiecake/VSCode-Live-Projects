@@ -35,6 +35,10 @@ playerSpeed = 500
 playerDirection = 0
 currentRoom = 1
 
+#Treasure
+#treasure = pygame.image.load("")
+treasures = []
+
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
 appleW = appleImg.get_width()
@@ -352,6 +356,12 @@ def find_angle(pos1, pos2):
     angle = abs(math.atan((deltaY) / (deltaX)))
     return (angle, dirX, dirY)
 
+class Treasure:
+    def __init__(self, x, y, room):
+        self.x = x
+        self.y = y
+        self.room = room
+
 #class for apple bullets
 class AppleBullets:
     def __init__(self, x, y, w, h, change_x, change_y, owner = "player"):
@@ -575,6 +585,8 @@ class Spawners:
         if (self.items.__len__() + self.queued < self.max):
             self.queued += 1
             self.timeouts.append((sec, self.cooldown, type))
+            #self.timeouts.append((TimeConcept(), self.cooldown, type))
+
 
     def remove_timeout(self, timeout):
         self.timeouts.remove(timeout)
