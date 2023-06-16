@@ -50,10 +50,6 @@ rapid_fire = False
 bullets = []
 appleBulletCount = 0
 
-#Apple Stockpiles
-#stockpiles = []
-#stockpilesTimeouts = []
-
 #Enemies
 enemyImg = pygame.image.load("Sprites/fob.png")
 enemyImg = pygame.transform.scale(enemyImg, (125,196))
@@ -71,6 +67,9 @@ bosses = []
 
 #Apple spawners
 spawners = []
+
+#Treasure
+treasures = []
 
 #rooms
 rooms = []
@@ -582,7 +581,7 @@ class Spawners:
         self.initial_pos = initial_pos
             
     def check_for_items(self, sec):
-        if (self.items.__len__() + self.queued < self.max):
+        if (self.items.__len__() + self.queued < self.max and self.enabled):
             self.queued += 1
             self.timeouts.append((sec, self.cooldown, type))
             #self.timeouts.append((TimeConcept(), self.cooldown, type))
@@ -611,10 +610,17 @@ class AppleSpawners(Spawners):
         self.remove_timeout(timeout)
 
 class EnemySpawners(Spawners):
+    dead = 0
+
     def spawn(self, timeout):
         enemy = spawn_enemy(self.initial_pos, self.room)
         self.add_item(enemy)
         self.remove_timeout(timeout)
+    
+    def addDeadCount(self):
+        self.dead += 1;
+        if (self.dead >= self.max * 4):
+            self.enabled = False;
 
 
 class BossSpawners(Spawners):
@@ -738,6 +744,9 @@ spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds bosses
 bosses.append(Bosses(100, 200, boss_w, boss_h, 17))
+
+#Adds treasures
+treasures.append(Treasure(340, 275, 18));
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -1005,6 +1014,7 @@ while running:
                             enemies.remove(enemy)
                             bullets.remove(bullet)
                             enemies_killed += 1
+                            spawner.addDeadCount()
                             break
                 else:
                     #Resets the enemy to its original position when not in the room
