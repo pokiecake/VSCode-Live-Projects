@@ -21,7 +21,6 @@ screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("Buffet Wars")
 icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
-game_won = False
 
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
@@ -591,7 +590,7 @@ class Spawners:
         self.initial_pos = initial_pos
             
     def check_for_items(self, sec):
-        if (self.items.__len__() + self.queued < self.max and self.enabled):
+        if (self.items.__len__() + self.queued < self.max):
             self.queued += 1
             self.timeouts.append((sec, self.cooldown, type))
             #self.timeouts.append((TimeConcept(), self.cooldown, type))
@@ -629,10 +628,6 @@ class EnemySpawners(Spawners):
     
     def addDeadCount(self):
         self.dead += 1;
-        if (self.dead >= self.max * 4):
-            self.enabled = False;
-            self.timeouts = []
-            self.queued = 0
 
 
 class BossSpawners(Spawners):
@@ -750,9 +745,9 @@ spawners.append(EnemySpawners("enemy", 3, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 10, 3, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
+spawners.append(BossSpawners("Boss", 17, 1, 30, (100, 200)))
 
 #adds bosses
-bosses.append(Bosses(100, 200, boss_w, boss_h, 17))
 
 #Adds treasures
 treasures.append(Treasure(100, 200, 18));
@@ -991,8 +986,6 @@ while running:
             if HP_DMG.cooldown(2):
                 print("player hit by boss's bullet")
                 health_bar.hp = health_bar.hp - 10
-
-    game_won = True #will become false if a spawner is enabled
     #checks for collision for all spawners
     for spawner in spawners:
         spawner.check_for_items(currentTime)
@@ -1032,46 +1025,44 @@ while running:
                 else:
                     #Resets the enemy to its original position when not in the room
                     enemy.reset_pos()
-            if spawner.enabled:
-                game_won = False
+        #moves boss and detect collision
+        elif spawner.type == "boss":
+            bosses = spawner.get_items()
+            for boss in bosses:
+                if (boss.inRoom == currentRoom):
+                    #Makes the boss move and attempt an attack
+                    boss.move(delta)
+                    boss.attempt_attack()
 
-    #moves boss and detect collision
-    for boss in bosses:
-        game_won = False
-        if (boss.inRoom == currentRoom):
-            #Makes the boss move and attempt an attack
-            boss.move(delta)
-            boss.attempt_attack()
+                    #draws the boss and its shield if not vulnerable
+                    if (not boss.vulnerable):
+                        pygame.draw.rect(screen, (100, 100, 255), (boss.x - 5, boss.y - 5, boss.w + 10, boss.h + 10))
+                    draw(boss_img, boss.x, boss.y)
+                    boss.toggle_vulnerability()
 
-            #draws the boss and its shield if not vulnerable
-            if (not boss.vulnerable):
-                pygame.draw.rect(screen, (100, 100, 255), (boss.x - 5, boss.y - 5, boss.w + 10, boss.h + 10))
-            draw(boss_img, boss.x, boss.y)
-            boss.toggle_vulnerability()
+                    #Queues a movement opportunity
+                    boss.queue_move(currentTime)   
 
-            #Queues a movement opportunity
-            boss.queue_move(currentTime)   
-
-            #Checks collision with boss and player. Removes health on collide
-            if (boss.checkCollision(playerX, playerY, playerW, playerH)): 
-                if HP_DMG.cooldown(2):
-                    print("hit by enemy")
-                    health_bar.hp = health_bar.hp - 10
-            #Checks collision with boss and bullets
-            for bullet in bullets:
-                if (bullet.owner == "player" and check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [boss.x, boss.y, boss.w, boss.h])):
-                    print("bullet hit boss")
-                    #Calls the hit method in the boss. Lowers the health if vulnerable
-                    m = boss.hit()
-                    if (m == "killed"):
-                        bosses.remove(boss)
-                        enemies_killed += 1
-                        rooms[16].entrances[1].open = True
-                    bullets.remove(bullet)
-                    break
-        else:
-            #resets the boss position when not in the same room
-            boss.reset()
+                    #Checks collision with boss and player. Removes health on collide
+                    if (boss.checkCollision(playerX, playerY, playerW, playerH)): 
+                        if HP_DMG.cooldown(2):
+                            print("hit by enemy")
+                            health_bar.hp = health_bar.hp - 10
+                    #Checks collision with boss and bullets
+                    for bullet in bullets:
+                        if (bullet.owner == "player" and check_collisions([bullet.x, bullet.y, bullet.w, bullet.h], [boss.x, boss.y, boss.w, boss.h])):
+                            print("bullet hit boss")
+                            #Calls the hit method in the boss. Lowers the health if vulnerable
+                            m = boss.hit()
+                            if (m == "killed"):
+                                bosses.remove(boss)
+                                enemies_killed += 1
+                                rooms[16].entrances[1].open = True
+                            bullets.remove(bullet)
+                            break
+                else:
+                    #resets the boss position when not in the same room
+                    boss.reset()
 
     #loops through all the treasures
     for treasure in treasures:
@@ -1094,11 +1085,6 @@ while running:
                 inEntrance = entrance.get_vals()
             else:
                 inEntrance = -1
-    game_won = True
-    if game_won and currentRoom != 0:
-        playerX = 700
-        playerY = 200
-        currentRoom = 0
 
     #draws the players and apples
     player(playerX, playerY)
