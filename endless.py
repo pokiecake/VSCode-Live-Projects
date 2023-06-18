@@ -773,6 +773,8 @@ stuckspeed = 0.0 * playerSpeed
 #sets healthbar
 health_bar.hp = 100
 HP_DMG = TimeConcept()
+#I make it start at negative 2 because I don't want it to trigger at the beginning of the game
+HP_DMG.oldtime1 = -2
 
 #Loops through the bosses to set some values specific to the bosses
 for boss in bosses:
@@ -1087,8 +1089,11 @@ while running:
             else:
                 inEntrance = -1
 
-    #draws the players and apples
-    player(playerX, playerY)
+    #draws the player in whatever state they are in
+    if (HP_DMG.cooldown(2, False)):
+        player(playerX, playerY)
+    else:
+        draw(appleImg, playerX, playerY)
     #draws text & other assets
     showammo(ammox,ammoy)
     showtime(timex,timey)
@@ -1098,13 +1103,6 @@ while running:
         showEnterPopup(enterPopupX, enterPopupY)
     #test canvas (put temporary code here to run)
     
-    #Code that makes the player's sprite different when damaged. It currently turns the player into an apple
-    """
-    if (HP_DMG.cooldown(2, False)):
-        player(playerX, playerY)
-    else:
-        draw(appleImg, playerX, playerY)
-    """
 
     #checks the spawners to see if a stockpile should be created
     check_timeouts()
