@@ -21,7 +21,6 @@ screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("Buffet Wars")
 icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
-game_won = False
 
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
@@ -86,6 +85,11 @@ rooms = []
 entranceW = 100
 entranceH = 200
 inEntrance = -1
+
+#win screen
+win_screen = pygame.image.load("Backgrounds/Winner.png")
+win_screen = pygame.transform.scale(win_screen, (800, 600))
+game_won = False
 
 #Text
 ammofont = pygame.font.Font('freesansbold.ttf',32)
@@ -803,7 +807,7 @@ while running:
 
     match(currentRoom):
         case 0:
-            screen.fill((100, 255, 100))
+            screen.blit(win_screen, (0, 0))
             draw(TURKEY_img, 100, 250)
         case 1:
             screen.blit(BGImage, (0,0))
