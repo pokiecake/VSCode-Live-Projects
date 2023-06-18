@@ -35,6 +35,10 @@ playerSpeed = 500
 playerDirection = 0
 currentRoom = 1
 
+#Treasure
+#treasure = pygame.image.load("")
+treasures = []
+
 #Apple
 appleImg = pygame.image.load("Assets/Apple.png")
 appleW = appleImg.get_width()
@@ -45,10 +49,6 @@ bullet_state = "ready"
 rapid_fire = False
 bullets = []
 appleBulletCount = 0
-
-#Apple Stockpiles
-#stockpiles = []
-#stockpilesTimeouts = []
 
 #Enemies
 enemyImg = pygame.image.load("Sprites/fob.png")
@@ -67,6 +67,9 @@ bosses = []
 
 #Apple spawners
 spawners = []
+
+#Treasure
+treasures = []
 
 #rooms
 rooms = []
@@ -352,6 +355,12 @@ def find_angle(pos1, pos2):
     angle = abs(math.atan((deltaY) / (deltaX)))
     return (angle, dirX, dirY)
 
+class Treasure:
+    def __init__(self, x, y, room):
+        self.x = x
+        self.y = y
+        self.room = room
+
 #class for apple bullets
 class AppleBullets:
     def __init__(self, x, y, w, h, change_x, change_y, owner = "player"):
@@ -572,9 +581,11 @@ class Spawners:
         self.initial_pos = initial_pos
             
     def check_for_items(self, sec):
-        if (self.items.__len__() + self.queued < self.max):
+        if (self.items.__len__() + self.queued < self.max and self.enabled):
             self.queued += 1
             self.timeouts.append((sec, self.cooldown, type))
+            #self.timeouts.append((TimeConcept(), self.cooldown, type))
+
 
     def remove_timeout(self, timeout):
         self.timeouts.remove(timeout)
@@ -599,10 +610,17 @@ class AppleSpawners(Spawners):
         self.remove_timeout(timeout)
 
 class EnemySpawners(Spawners):
+    dead = 0
+
     def spawn(self, timeout):
         enemy = spawn_enemy(self.initial_pos, self.room)
         self.add_item(enemy)
         self.remove_timeout(timeout)
+    
+    def addDeadCount(self):
+        self.dead += 1;
+        if (self.dead >= self.max * 4):
+            self.enabled = False;
 
 
 class BossSpawners(Spawners):
@@ -726,6 +744,9 @@ spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
 
 #adds bosses
 bosses.append(Bosses(100, 200, boss_w, boss_h, 17))
+
+#Adds treasures
+treasures.append(Treasure(340, 275, 18));
 
 #background sound
 mixer.music.load('Assets/Sky.wav')
@@ -995,6 +1016,7 @@ while running:
                             enemies.remove(enemy)
                             bullets.remove(bullet)
                             enemies_killed += 1
+                            spawner.addDeadCount()
                             break
                 else:
                     #Resets the enemy to its original position when not in the room
