@@ -21,11 +21,10 @@ screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("Buffet Wars")
 icon = pygame.image.load("Assets/turkey.png")
 pygame.display.set_icon(icon)
-game_won = False
 
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
-playerImg = pygame.transform.scale(playerImg,(115,180))
+playerImg = pygame.transform.scale(playerImg,(100,180))
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
@@ -53,7 +52,7 @@ appleBulletCount = 0
 
 #Enemies
 enemyImg = pygame.image.load("Sprites/fob.png")
-enemyImg = pygame.transform.scale(enemyImg, (115,180))
+enemyImg = pygame.transform.scale(enemyImg, (100,180))
 enemyW = enemyImg.get_width()
 enemyH = enemyImg.get_height()
 enemies = []
@@ -86,6 +85,11 @@ rooms = []
 entranceW = 100
 entranceH = 200
 inEntrance = -1
+
+#win screen
+win_screen = pygame.image.load("Backgrounds/Winner.png")
+win_screen = pygame.transform.scale(win_screen, (800, 600))
+game_won = False
 
 #Text
 ammofont = pygame.font.Font('freesansbold.ttf',32)
@@ -803,7 +807,7 @@ while running:
 
     match(currentRoom):
         case 0:
-            screen.fill((100, 255, 100))
+            screen.blit(win_screen, (0, 0))
             draw(TURKEY_img, 100, 250)
         case 1:
             screen.blit(BGImage, (0,0))
@@ -1096,7 +1100,7 @@ while running:
                 inEntrance = entrance.get_vals()
             else:
                 inEntrance = -1
-    game_won = True
+
     if game_won and currentRoom != 0:
         playerX = 700
         playerY = 200

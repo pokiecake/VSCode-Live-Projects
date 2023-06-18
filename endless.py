@@ -24,7 +24,7 @@ pygame.display.set_icon(icon)
 
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
-playerImg = pygame.transform.scale(playerImg,(125,196))
+playerImg = pygame.transform.scale(playerImg,(100,180))
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
@@ -52,7 +52,7 @@ appleBulletCount = 0
 
 #Enemies
 enemyImg = pygame.image.load("Sprites/fob.png")
-enemyImg = pygame.transform.scale(enemyImg, (125,196))
+enemyImg = pygame.transform.scale(enemyImg, (100,180))
 enemyW = enemyImg.get_width()
 enemyH = enemyImg.get_height()
 enemies = []
@@ -297,6 +297,7 @@ def spawn_boss(pos, room):
     x = pos[0]
     y = pos[1]
     b = Bosses(x, y, boss_w, boss_h, room)
+    b.set_boss_values()
     return b 
 
 #temporary timer to automatically create stockpiles after a delay
@@ -745,9 +746,7 @@ spawners.append(EnemySpawners("enemy", 3, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 10, 3, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (50, 50)))
 spawners.append(EnemySpawners("enemy", 16, 1, 5, (700, 450)))
-spawners.append(BossSpawners("Boss", 17, 1, 30, (100, 200)))
-
-#adds bosses
+spawners.append(BossSpawners("boss", 17, 1, 10, (100, 200)))
 
 #Adds treasures
 treasures.append(Treasure(100, 200, 18));
@@ -800,6 +799,8 @@ while running:
             draw(TURKEY_img, 100, 250)
         case 1:
             screen.blit(BGImage, (0,0))
+            popup = ammofont.render("Endless ;)", False, (255, 0, 0))
+            screen.blit(popup, (340, 0))
         case 2:
             screen.fill((150, 0, 150))
         case 3:
