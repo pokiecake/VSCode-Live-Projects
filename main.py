@@ -25,7 +25,7 @@ game_won = False
 
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
-playerImg = pygame.transform.scale(playerImg,(115,180))
+playerImg = pygame.transform.scale(playerImg,(100,180))
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
@@ -53,7 +53,7 @@ appleBulletCount = 0
 
 #Enemies
 enemyImg = pygame.image.load("Sprites/fob.png")
-enemyImg = pygame.transform.scale(enemyImg, (115,180))
+enemyImg = pygame.transform.scale(enemyImg, (100,180))
 enemyW = enemyImg.get_width()
 enemyH = enemyImg.get_height()
 enemies = []
@@ -1096,7 +1096,7 @@ while running:
                 inEntrance = entrance.get_vals()
             else:
                 inEntrance = -1
-    game_won = True
+
     if game_won and currentRoom != 0:
         playerX = 700
         playerY = 200
