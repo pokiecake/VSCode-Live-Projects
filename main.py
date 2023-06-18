@@ -799,6 +799,8 @@ while running:
     #draws spongebob background
     #pygame.transform.scale_by(BGImage,20)
     #screen.blit(background, (0,0))
+
+
     match(currentRoom):
         case 0:
             screen.fill((100, 255, 100))
