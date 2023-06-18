@@ -25,6 +25,8 @@ pygame.display.set_icon(icon)
 #Player
 playerImg = pygame.image.load("Sprites/bob.png")
 playerImg = pygame.transform.scale(playerImg,(100,180))
+hurt_img = pygame.image.load("Sprites/Ouch.png")
+hurt_img = pygame.transform.scale(hurt_img, (100, 180))
 playerW = playerImg.get_width()
 playerH = playerImg.get_height()
 playerX = 370
@@ -1093,7 +1095,7 @@ while running:
     if (HP_DMG.cooldown(2, False)):
         player(playerX, playerY)
     else:
-        draw(appleImg, playerX, playerY)
+        draw(hurt_img, playerX, playerY)
     #draws text & other assets
     showammo(ammox,ammoy)
     showtime(timex,timey)
