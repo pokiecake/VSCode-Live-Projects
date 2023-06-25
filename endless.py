@@ -761,9 +761,13 @@ mixer.music.play(-1)
 #Global Variable Setup
 #Key Press Status (held down or not)
 lefthold = False
+ahold = False
 righthold = False
+dhold = False
 uphold = False
+whold = False
 downhold = False
+shold = False
 lastkey = ""
 
 #Keeps track of dash time
@@ -862,31 +866,32 @@ while running:
             #sets the x and y changes based on what is pressed
             #sets status of hold on the key to true
             #if both opposite directions are held, player moves slower at rate of stuckspeed
-            if event.key == pygame.K_LEFT and righthold == False:
-                playerX_change = -playerSpeed
-                lefthold = True
-            elif event.key == pygame.K_LEFT and righthold == True:
-                playerX_change = stuckspeed
-                lefthold = True
-            if event.key == pygame.K_RIGHT and lefthold == False:
-                playerX_change = playerSpeed
-                righthold = True
-            elif event.key == pygame.K_RIGHT and lefthold == True:
-                playerX_change = -stuckspeed
-                righthold = True
+            lefthold = event.key == pygame.K_LEFT or lefthold
+            ahold = event.key == pygame.K_a or ahold
+            righthold = event.key == pygame.K_RIGHT or righthold
+            dhold = event.key == pygame.K_d or dhold
+            uphold = event.key == pygame.K_UP or uphold
+            whold = event.key == pygame.K_w or whold
+            downhold = event.key == pygame.K_DOWN or downhold
+            shold = event.key == pygame.K_s or shold
 
-            if event.key == pygame.K_UP and downhold == False:
+            if (lefthold or ahold) and (not righthold and not dhold):
+                playerX_change = -playerSpeed
+            elif (lefthold or ahold) and (righthold or dhold):
+                playerX_change = stuckspeed
+            if (righthold or dhold) and (not lefthold and not ahold):
+                playerX_change = playerSpeed
+            elif (righthold or dhold) and (lefthold or ahold):
+                playerX_change = -stuckspeed
+
+            if (uphold or whold) and (not downhold and not shold):
                 playerY_change = -playerSpeed
-                uphold = True
-            elif event.key == pygame.K_UP and downhold == True:
+            elif (uphold or whold) and (downhold or shold):
                 playerY_change = stuckspeed
-                uphold = True
-            if event.key == pygame.K_DOWN and uphold == False:
+            if (downhold or shold) and (not uphold and not whold):
                 playerY_change = playerSpeed
-                downhold = True
-            elif event.key == pygame.K_DOWN and uphold == True:
+            elif (downhold or shold) and (uphold or whold):
                 playerY_change = -stuckspeed
-                downhold = True
             
             #testing key presses here
             if dash.timewindow(0.5) and lastkey == event.key:
@@ -929,30 +934,31 @@ while running:
             #stops changes after corresponding keys are lifted given that no other key is held
             #sets status of hold on the key to false
             #if the other direction is held, direction immediately switches to match
-            if event.key == pygame.K_LEFT and righthold == True:
+            lefthold = not event.key == pygame.K_LEFT and lefthold
+            ahold = not event.key == pygame.K_a and ahold
+            righthold = not event.key == pygame.K_RIGHT and righthold
+            dhold = not event.key == pygame.K_d and dhold
+            uphold = not event.key == pygame.K_UP and uphold
+            whold = not event.key == pygame.K_w and whold
+            downhold = not event.key == pygame.K_DOWN and downhold
+            shold = not event.key == pygame.K_s and shold
+
+            if not (lefthold or ahold) and (righthold or dhold):
                 playerX_change = playerSpeed
-                lefthold = False
-            elif event.key == pygame.K_RIGHT and lefthold == True:
+            elif not (righthold or dhold) and (lefthold or ahold):
                 playerX_change = -playerSpeed
-                righthold = False
-            elif event.key == pygame.K_RIGHT:
-                righthold = False
+            elif not (righthold or dhold):
                 playerX_change = 0
-            elif event.key == pygame.K_LEFT:
-                lefthold = False
+            elif not (lefthold or ahold):
                 playerX_change = 0
 
-            if event.key == pygame.K_UP and downhold == True:
+            if not (uphold or whold) and (downhold or shold):
                 playerY_change = playerSpeed
-                uphold = False
-            elif event.key == pygame.K_DOWN and uphold == True:
+            elif not (downhold or shold) and (uphold or whold):
                 playerY_change = -playerSpeed
-                downhold = False
-            elif event.key == pygame.K_DOWN:
-                downhold = False
+            elif not (downhold or shold):
                 playerY_change = 0
-            elif event.key == pygame.K_UP:
-                uphold = False
+            elif not (uphold or whold):
                 playerY_change = 0
 
     #drawing hp bar

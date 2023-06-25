@@ -712,6 +712,7 @@ while running:
             lastkey = event.key
 
             #changes the direction of the player's shooting
+            """
             if event.key == pygame.K_w:
                 playerDirection = 0
             if event.key == pygame.K_d:
@@ -720,6 +721,9 @@ while running:
                 playerDirection = 2
             if event.key == pygame.K_a:
                 playerDirection = 3
+            """
+            
+            #shoots the apple
             if event.key == pygame.K_SPACE:
                 if appleBulletCount > 0:
                     fire_apple(playerX, playerY)
